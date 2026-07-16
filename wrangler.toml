@@ -20,8 +20,3 @@ migrations_dir = "./migrations"
 [[r2_buckets]]
 binding = "TELEMETRY"
 bucket_name = "weld-telemetry"
-
-# ── Environment-Specific Overrides ────────────────────────────────────────────
-[env.production]
-# Fill in after `wrangler d1 create` and `wrangler r2 bucket create`
-# d1_databases[0].database_id = "your-d1-database-id"
