@@ -67,18 +67,17 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
   }, []);
 
   // ── Dual MQTT Ingestion Pipeline ───────────────────────────────────────────
-  // Only activates when a student is selected and we're on a compatible origin.
-  // HTTPS pages cannot connect to insecure WS brokers — MQTT is offline on production.
+  // MQTT is loaded lazily. On HTTPS, the cloud WSS broker connects.
+  // On HTTP (classroom LAN), the local WS broker also connects.
 
   useEffect(() => {
     const isSecure = window.location.protocol === 'https:';
-
     let localClient: any = null;
     let cloudClient: any = null;
     let cleanup = false;
 
-    // Fetch MQTT credentials from Cloudflare secrets via API
-    async function initMQTT() {
+    // Only load mqtt.js when needed — avoids React hook conflicts from static import
+    const loadMQTT = async () => {
       let brokerUrl = FALLBACK_CLOUD_BROKER;
       let mqttUser = '';
       let mqttPass = '';
@@ -93,10 +92,19 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
         }
       } catch { /* Use fallback */ }
 
-      const mqtt = await import('mqtt');
+      // Dynamic import — mqtt.js only loaded in environments where MQTT is expected
+      let mqttModule: any;
+      try {
+        mqttModule = await import('mqtt');
+      } catch {
+        console.log('[MQTT] mqtt.js unavailable — running without broker connection.');
+        return;
+      }
       if (cleanup) return;
 
-      const handleIncomingFrame = (topic: string, message: Buffer) => {
+      const mqtt = mqttModule.default || mqttModule;
+
+      const handleIncomingFrame = (topic: string, message: any) => {
         try {
           const topicParts = topic.split('/');
           const studentId = topicParts[2];
@@ -151,7 +159,7 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
       } catch {}
     }
 
-    initMQTT().catch(() => {});
+    loadMQTT().catch(() => {});
 
     return () => {
       cleanup = true;

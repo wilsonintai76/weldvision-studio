@@ -15,17 +15,11 @@ let dbInstance: any = null;
 export async function getSqliteDbInstance() {
   if (dbInstance) return dbInstance;
 
-  // Dynamic import of SQLite-WASM. Falls back to in-memory if CDN unavailable.
+  // Dynamic import of SQLite-WASM from npm package (sql.js)
   try {
-    // Try official sql.js CDN (more reliable than the aspect-build package)
-    const { default: initSqlJs } = await import(
-      'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js'
-    );
+    const initSqlJs = (await import('sql.js')).default;
 
-    const SQL = await initSqlJs({
-      locateFile: (_file: string) =>
-        'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.wasm',
-    });
+    const SQL = await initSqlJs();
 
     // Try OPFS-backed persistent storage
     let db: any;
