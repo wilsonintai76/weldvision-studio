@@ -176,7 +176,7 @@ export function processGMAWFrame(
   const { settings, telemetry } = packet;
 
   // Step A: Resolve amperage from wire feed speed
-  const resolvedAmperage = resolveAmperage(settings.wire_feed_speed_ipm);
+  const resolvedAmperage = resolveAmperage(settings.wireFeedSpeed);
 
   // Step B: Calculate net heat input
   const heatInput = calculateHeatInput(
@@ -270,14 +270,14 @@ export function buildSessionSummary(
     frames.length > 0
       ? frames.reduce((sum, f) => {
           // Approximate per-frame amperage (same settings across session)
-          return sum + resolveAmperage(packet.settings.wire_feed_speed_ipm);
+          return sum + resolveAmperage(packet.settings.wireFeedSpeed);
         }, 0) / frames.length
       : 0;
 
   const avgHeatInput =
     frames.length > 0
       ? frames.reduce((sum, f) => {
-          const I = resolveAmperage(packet.settings.wire_feed_speed_ipm);
+          const I = resolveAmperage(packet.settings.wireFeedSpeed);
           return sum + calculateHeatInput(packet.settings.voltage, I, f.travel_speed_mms);
         }, 0) / frames.length
       : 0;
@@ -289,7 +289,7 @@ export function buildSessionSummary(
     student_id: packet.meta.student_id,
     bracket_id: packet.meta.bracket_id,
     configured_voltage: packet.settings.voltage,
-    configured_wfs_ipm: packet.settings.wire_feed_speed_ipm,
+    configured_wfs_ipm: packet.settings.wireFeedSpeed,
     resolved_avg_amperage: Math.round(avgAmperage * 10) / 10,
     calculated_heat_input: Math.round(avgHeatInput * 10000) / 10000,
     spatial_score,

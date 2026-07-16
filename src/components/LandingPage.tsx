@@ -48,10 +48,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
       <div className="max-w-4xl w-full">
         {/* Header Section */}
-        <div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+        <div
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
@@ -71,9 +68,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           {objectives.map((obj, i) => (
             <div
               key={obj.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.1 }}
               className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-indigo-500/30 transition-colors"
             >
               <div className="mb-4">{obj.icon}</div>
@@ -85,9 +79,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
         {/* Instructor Sign-In */}
         <div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6 }}
           className="max-w-sm mx-auto"
         >
           <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">

@@ -303,11 +303,7 @@ export const DistortionVisualizer: React.FC<DistortionVisualizerProps> = ({
 
           <div>
             {!isCurveMinimized && (
-              <div 
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+              <div
                 className="flex flex-col gap-4 overflow-hidden"
               >
                 <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col justify-center h-48 relative">

@@ -66,15 +66,16 @@ export interface LabPreset {
   parameters: Partial<WeldParameters>;
 }
 
-// ── GMAW-Specific Telemetry Contract ────────────────────────────────────────
+// ── GMAW-Specific Telemetry Contract (aligned with Android WeldVisionState.kt) ─
 
 /**
- * Uniform data contract for every packet traveling across the MQTT broker
- * or stored inside the OPFS SQLite file system. Locked to GMAW only.
+ * Every MQTT packet matches Android's WeldVisionState fields exactly.
+ * No field name translation needed between Android and Web.
  */
 export interface GMAWTelemetryPacket {
   meta: GMAWSessionMeta;
-  settings: GMAWSettings;
+  settings: GMAWMachineSettings;
+  plate: GMAWPlateConfig;          // Physical plate from Android module
   telemetry: GMAWTelemetryFrame;
 }
 
@@ -82,30 +83,37 @@ export interface GMAWSessionMeta {
   session_id: string;
   student_id: string;
   bracket_id: string;
+  /** Android module name: "mig_butt", "mig_tee", etc. */
+  module: string;
 }
 
-export interface GMAWSettings {
-  /** GMAW constant-voltage setpoint (V) */
-  voltage: number;
-  /** Wire feed speed (in/min) */
-  wire_feed_speed_ipm: number;
+/** Machine settings — matches Android WeldingModule */
+export interface GMAWMachineSettings {
+  voltage: number;           // Arc voltage (V)
+  amperage: number;          // Welding current (A)
+  wireFeedSpeed: number;     // Wire feed speed (IPM or mm/s)
+  gasFlowRate: number;       // Shielding gas flow (CFH or L/min)
 }
 
+/** Physical plate — set by Android module, drives simulation */
+export interface GMAWPlateConfig {
+  material: 'Carbon Steel' | 'Stainless Steel' | 'Aluminum';
+  thickness: number;         // Plate thickness (mm)
+  jointType: JointType;
+}
+
+/** Per-frame telemetry — matches Android real-time tracking */
 export interface GMAWTelemetryFrame {
-  /** Gun tip X position (mm) */
-  x_mm: number;
-  /** Gun tip Y position (mm) */
-  y_mm: number;
-  /** Contact tip to workpiece distance (mm) */
-  z_gap_mm: number;
-  /** Instantaneous travel speed (mm/s) */
-  travel_speed_mms: number;
-  /** Work angle (degrees) */
-  work_angle_deg: number;
-  /** Travel/drag angle (degrees) */
-  travel_angle_deg: number;
-  /** Gun trigger state */
-  trigger_pressed: boolean;
+  x_mm: number;              // Gun tip X position (mm)
+  y_mm: number;              // Gun tip Y position (mm)
+  z_gap_mm: number;          // Contact tip to workpiece gap (mm)
+  travel_speed_mms: number;  // Instantaneous travel speed (mm/s)
+  work_angle_deg: number;    // Work angle (degrees)
+  travel_angle_deg: number;  // Travel/drag angle (degrees)
+  trigger_pressed: boolean;  // Gun trigger state
+  /** Target values for scoring */
+  targetGap: number;         // Ideal arc gap (mm)
+  targetSpeed: number;       // Ideal travel speed (mm/s)
 }
 
 /**

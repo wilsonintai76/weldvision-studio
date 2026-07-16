@@ -505,7 +505,7 @@ export function simulateGMAWFromTelemetry(
   const { settings, telemetry } = packet;
 
   // Step A: Resolve amperage
-  const resolvedAmps = resolveAmperage(settings.wire_feed_speed_ipm);
+  const resolvedAmps = resolveAmperage(settings.wireFeedSpeed);
 
   // Step B: Net heat input
   const heatInput = calculateHeatInput(settings.voltage, resolvedAmps, telemetry.travel_speed_mms);

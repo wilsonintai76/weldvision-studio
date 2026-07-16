@@ -933,10 +933,7 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
 
               <div>
                 {!isThermalCurveMinimized && (
-                  <div 
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
+                  <div
                     className="flex-1 w-full h-full mt-1.5 overflow-hidden"
                   >
                     <ResponsiveContainer width="100%" height={90}>

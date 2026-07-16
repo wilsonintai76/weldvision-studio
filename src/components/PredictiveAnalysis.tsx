@@ -147,9 +147,7 @@ export const PredictiveAnalysis: React.FC<PredictiveAnalysisProps> = ({
         {/* AI Insight Card */}
         <div>
           {aiExplanation && (
-            <div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+            <div
               className="relative"
             >
               <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500/40 to-purple-500/40 rounded-xl blur-sm opacity-50"></div>

@@ -113,17 +113,12 @@ export default function App() {
         </div>
         <div 
           key={label + value}
-          initial={{ opacity: 0.6, x: -2 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.2 }}
           className="text-base md:text-lg font-display font-bold text-slate-100"
         >
           {value}
         </div>
         <span 
           key={label + subValue.text}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
           className={`text-[9px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border self-start truncate max-w-full ${subValue.class}`}
         >
           {subValue.text}
@@ -132,10 +127,7 @@ export default function App() {
 
       <div>
         {activeTooltip === tooltipKey && (
-          <div 
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 5, scale: 0.95 }}
+          <div
             className="absolute z-50 bottom-full left-0 right-0 mb-3 p-3 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl pointer-events-none sm:w-64 sm:left-1/2 sm:-translate-x-1/2"
           >
             <div className="text-[11px] font-bold text-amber-500 uppercase tracking-widest mb-1">
@@ -198,8 +190,6 @@ export default function App() {
       ) : (
         <div 
           key="lab"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
           className="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 md:p-6 flex flex-col gap-6 select-none" 
           id="app-root"
         >
@@ -272,9 +262,6 @@ export default function App() {
       {/* Top Level Real-Time Physical Metrics Dashboard */}
       <section 
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
         id="quick-metrics-dashboard"
       >
         <MetricCard 
@@ -413,9 +400,6 @@ export default function App() {
           {/* Active Tab View Window */}
           <div
             key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
             id="tab-viewport"
             className="flex flex-col gap-6"
           >
