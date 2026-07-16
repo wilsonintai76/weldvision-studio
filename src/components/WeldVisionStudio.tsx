@@ -123,7 +123,7 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
 
       // Cloud WAN broker — WSS always available
       try {
-        cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'studio_dashboard', password: 'pwd', reconnectPeriod: 5000, connectTimeout: 8000 });
+        cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'wilsonintai76', password: 'Gw3Nwi78On@76', reconnectPeriod: 5000, connectTimeout: 8000 });
         cloudClient.on('connect', () => { if (!cleanup) cloudClient!.subscribe('weldvision/room_A/+/live'); });
         cloudClient.on('message', handleIncomingFrame);
         cloudClient.on('error', () => {});
