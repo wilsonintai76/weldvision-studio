@@ -1,0 +1,10 @@
+name = "weldsim-studio"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Pages static build output
+pages_build_output_dir = "./dist"
+
+# Worker AI binding — provides access to @cf/meta/llama-3.3-70b-instruct
+[ai]
+binding = "AI"

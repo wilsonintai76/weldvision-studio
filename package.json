@@ -1,0 +1,36 @@
+{
+  "name": "weldsim-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --mode development --watch & wrangler pages dev dist --compatibility-flag=nodejs_compat",
+    "build": "vite build",
+    "deploy": "vite build && wrangler pages deploy dist",
+    "preview": "vite build && wrangler pages dev dist",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@vitejs/plugin-react": "^5.0.4",
+    "hono": "^4.7.11",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "recharts": "^3.9.2",
+    "three": "^0.185.1",
+    "vite": "^6.2.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250712.0",
+    "@types/node": "^22.14.0",
+    "@types/three": "^0.185.1",
+    "autoprefixer": "^10.4.21",
+    "tailwindcss": "^4.1.14",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.3",
+    "wrangler": "^4.110.0"
+  }
+}
