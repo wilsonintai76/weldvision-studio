@@ -19,7 +19,12 @@ export async function getSqliteDbInstance() {
   try {
     const initSqlJs = (await import('sql.js')).default;
 
-    const SQL = await initSqlJs();
+    // sql.js needs to locate its WASM file. In production, use the CDN.
+    // In dev, Vite handles this automatically via the assets directory.
+    const SQL = await initSqlJs({
+      locateFile: (file: string) =>
+        `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`,
+    });
 
     // Try OPFS-backed persistent storage
     let db: any;
