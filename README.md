@@ -9,7 +9,7 @@ WeldSim Studio is the **browser-based frontend** of the WeldVision dual-platform
 ## Features
 
 | Module | Description |
-|---|---|
+| --- | --- |
 | **3D Weld Bead Visualizer** | Real-time Three.js / WebGL rendering of weld bead geometry |
 | **Joint Type Viewer** | Butt, T-Joint, Lap Joint, T-Joint (Single Fillet) |
 | **Parameter Controls** | Current, voltage, speed, preheat, gas flow, electrode diameter |
@@ -27,7 +27,7 @@ WeldSim Studio is the **browser-based frontend** of the WeldVision dual-platform
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
+| --- | --- |
 | **Framework** | React 19 + TypeScript |
 | **Build Tool** | Vite 6 |
 | **3D Engine** | Three.js |
@@ -44,6 +44,7 @@ WeldSim Studio is the **browser-based frontend** of the WeldVision dual-platform
 ## Getting Started
 
 ### Prerequisites
+
 - **Node.js** 18+
 - **npm** 9+
 
@@ -72,6 +73,7 @@ npm run dev
 ```
 
 This starts:
+
 - **Vite** dev server (HMR, fast refresh)
 - **Cloudflare Pages Functions** (Wrangler) for the `/api/*` routes
 
@@ -97,7 +99,7 @@ Deploys the static build to Cloudflare Pages and the Worker to Cloudflare Edge.
 
 ## Project Structure
 
-```
+```text
 weldvision-studio/
 ├── functions/
 │   └── api/
@@ -136,7 +138,7 @@ weldvision-studio/
 ## API Endpoints
 
 | Method | Path | Description |
-|---|---|---|
+| --- | --- | --- |
 | `POST` | `/api/predictive-analysis` | AI metallurgical crack-risk analysis (Workers AI) |
 
 ---

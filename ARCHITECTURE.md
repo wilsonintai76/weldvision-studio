@@ -5,11 +5,12 @@
 WeldVision Studio is a dual-platform **GMAW (MIG) welding** simulation and training ecosystem spanning Android (mobile) and Web. The system is hyper-focused on a single welding process to eliminate computational overhead and deliver deterministic 60 Hz performance.
 
 > **Design Decision:** Locking the ecosystem exclusively to GMAW eliminates:
+>
 > - ❌ SMAW stick-electrode burn-off math (dynamic adaptive offset transforms)
 > - ❌ GTAW dual-hand tracking (secondary filler-rod AprilTag + primary torch)
 > - ✅ Fixed GMAW torch geometry — static contact-tube length, TCP offset never changes mid-weld
 
-```
+```text
 ====================================== APPLICATION & DEVICE LAYER ======================================
   [ Android: WeldVision Trainer App ]                      [ Web Browser: WeldSim Studio App ]
    • AprilTag GMAW Gun Tracking (single tag)                • Three.js WebGL Core Engine
@@ -74,7 +75,7 @@ Every packet — whether streaming live over MQTT or stored in OPFS SQLite — u
 ```
 
 | Field | Type | Description |
-|---|---|---|
+| --- | --- | --- |
 | `meta.session_id` | string | Unique session identifier |
 | `meta.student_id` | string | Student performing the weld |
 | `meta.bracket_id` | string | Calibration bracket reference |
@@ -111,6 +112,7 @@ where $V$ is voltage, $I$ is resolved amperage, and $v$ is the student's actual 
 ### Step C: Three.js Real-Time Bead Expansion
 
 Single unified logic path:
+
 1. If $Q$ exceeds critical plate melting threshold **and** `trigger_pressed` is `true`
 2. Grow a smooth 3D weld bead via procedural geometry extrusion
 3. Shift surface mesh colors along a thermal gradient: **Bright Yellow → Deep Cherry Red → Slag Gray**
@@ -120,8 +122,9 @@ Single unified logic path:
 ## Layer 1 — Application & Device
 
 ### WeldVision Trainer (Android)
+
 | Capability | Technology |
-|---|---|
+| --- | --- |
 | Single-tag GMAW gun tracking | AprilTag Computer Vision |
 | Secure user authentication | Android Biometric Enclave API |
 | Local SQLite calibration lookups | SQLite Room Database |
@@ -129,7 +132,7 @@ Single unified logic path:
 
 **Android Processing Loop (single operational cycle):**
 
-```
+```text
 [ Initialize Target Camera Frame ]
                │
                ▼
@@ -146,8 +149,9 @@ Single unified logic path:
 ```
 
 ### WeldSim Studio (Web) ← **This Repository**
+
 | Capability | Technology |
-|---|---|
+| --- | --- |
 | Real-time 3D weld bead rendering | Three.js / WebGL |
 | GMAW telemetry ingestion engine | `src/utils/gmaw-telemetry.ts` |
 | Offline-capable local data store | SQLite-WASM + OPFS |
@@ -159,7 +163,7 @@ Single unified logic path:
 
 ### Live GMAW Telemetry Pipeline (Online / Classroom Mode)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  PRIMARY LOCAL LANE                                      │
 │  Android ──► Mosquitto Broker [TCP:1883] ──► Web Client  │
@@ -176,7 +180,7 @@ Single unified logic path:
 
 ### Offline Queue Pipeline (Home Mode)
 
-```
+```text
 Android ──► Local JSON Log ──► Room DB Sync ──► Cloudflare Worker (on reconnect)
 ```
 
@@ -193,7 +197,7 @@ Android ──► Local JSON Log ──► Room DB Sync ──► Cloudflare Wor
 ### Client-Side Browser Workspace
 
 | Computation | File |
-|---|---|
+| --- | --- |
 | GMAW amperage resolution | `src/utils/gmaw-telemetry.ts` |
 | Net heat input density matrix | `src/utils/gmaw-telemetry.ts` |
 | 3D bead expansion (Three.js) | `src/utils/gmaw-telemetry.ts` + `src/components/ModelViewer3D.tsx` |
@@ -202,7 +206,7 @@ Android ──► Local JSON Log ──► Room DB Sync ──► Cloudflare Wor
 ### Serverless Cloudflare Edge Layer
 
 | Component | File |
-|---|---|
+| --- | --- |
 | Worker Core Router | `functions/api/[[route]].ts` |
 | GMAW Thermophysics Engine | `src/utils/simulation.ts`, `src/utils/gmaw-telemetry.ts` |
 | Metallurgy Crack-Risk Solver | `src/utils/metallurgy.ts` |
@@ -222,7 +226,7 @@ wrangler d1 execute weldvision-gmaw-db --file=./migrations/0001_gmaw_schema.sql
 ```
 
 | Table | Purpose |
-|---|---|
+| --- | --- |
 | `users` | Student/lecturer accounts with bracket assignment |
 | `bracket_calibration` | Per-bracket AprilTag focal length and TCP offsets |
 | `gmaw_sessions` | Completed weld runs with GMAW params, scores, and R2 archive keys |
@@ -230,7 +234,7 @@ wrangler d1 execute weldvision-gmaw-db --file=./migrations/0001_gmaw_schema.sql
 ### Cloudflare R2 (Object Storage)
 
 | Bucket | Content |
-|---|---|
+| --- | --- |
 | `weld-telemetry` | 60 Hz GMAW coordinate streams (`.json`), session recordings |
 | `weld-reports` | Generated PDF/HTML grade reports |
 
@@ -238,7 +242,7 @@ wrangler d1 execute weldvision-gmaw-db --file=./migrations/0001_gmaw_schema.sql
 
 ## Data Flow Summary
 
-```
+```text
 ┌──────────┐   MQTT (60 Hz)      ┌──────────────┐    REST/WS     ┌──────────────┐
 │ Android  │ ──────────────────► │ MQTT Broker   │ ────────────► │ Cloudflare   │
 │ Trainer  │   GMAW Contract     │ Mosquitto /   │               │ Worker       │
@@ -272,7 +276,7 @@ wrangler d1 execute weldvision-gmaw-db --file=./migrations/0001_gmaw_schema.sql
 ## Security Model
 
 | Layer | Mechanism |
-|---|---|
+| --- | --- |
 | Android → Cloud | Biometric attestation via Android Keystore |
 | Browser → Worker | HTTPS (TLS 1.3), COOP/COEP headers for OPFS isolation |
 | Worker → D1/R2 | Cloudflare internal binding (no exposed credentials) |
@@ -287,21 +291,6 @@ This repository (`weldvision-studio`) implements:
 - ✅ **WeldSim Studio Web App** — Three.js 3D visualization, GMAW parameter controls, defect analysis, distortion simulation
 - ✅ **GMAW Telemetry Engine** — Amperage resolution, heat input density, bead expansion logic
 - ✅ **Cloudflare Worker** — Hono-based REST API, Workers AI predictive analysis, GMAW session ingestion
-- ⬜ **D1 Schema & Bindings** — Pending implementation
-- ⬜ **R2 Telemetry Archive** — Pending implementation
-- ⬜ **MQTT WebSocket Bridge** — Pending implementation
-- ⬜ **SQLite-WASM + OPFS** — Pending implementation
-
-The Android WeldVision Trainer app is maintained in a separate repository.
-
----
-
-## Repository Scope
-
-This repository (`weldvision-studio`) implements:
-
-- ✅ **WeldSim Studio Web App** — Three.js 3D visualization, weld parameter controls, defect analysis, distortion simulation
-- ✅ **Cloudflare Worker** — Hono-based REST API, Workers AI predictive analysis endpoint
 - ⬜ **D1 Schema & Bindings** — Pending implementation
 - ⬜ **R2 Telemetry Archive** — Pending implementation
 - ⬜ **MQTT WebSocket Bridge** — Pending implementation
