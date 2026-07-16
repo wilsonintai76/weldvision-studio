@@ -48,7 +48,7 @@ const DEFAULT_PARAMETERS: WeldParameters = {
 export default function App() {
   const { user, logout } = useAuth();
   const [hasStarted, setHasStarted] = useState(false);
-  const [isWorkshopMode, setIsWorkshopMode] = useState(false);
+  const [isWorkshopMode, setIsWorkshopMode] = useState(true); // Default: Live Workshop
   const [parameters, setParameters] = useState<WeldParameters>(DEFAULT_PARAMETERS);
   const [selectedDefect, setSelectedDefect] = useState<string | null>(null);
   const [activePresetId, setActivePresetId] = useState<string | null>('perfect');
@@ -241,20 +241,19 @@ export default function App() {
               <span className="hidden sm:inline">Sign Out</span>
             </button>
             <div className="w-px h-4 bg-slate-700 mx-0.5"></div>
-            <div className="flex items-center gap-1.5 px-1.5 md:px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 shrink-0">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="hidden sm:inline">Analysis Mode</span>
+            <div className={`flex items-center gap-1.5 px-1.5 md:px-2 py-0.5 rounded text-amber-400 shrink-0 transition-all ${
+              isWorkshopMode
+                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${isWorkshopMode ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              <span className="hidden sm:inline">{isWorkshopMode ? 'Live Workshop' : 'Analysis Mode'}</span>
             </div>
             <button
               onClick={() => setIsWorkshopMode(!isWorkshopMode)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight transition-all ${
-                isWorkshopMode
-                  ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'
-                  : 'bg-slate-700/50 border border-slate-600 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30'
-              }`}
+              className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-700/50 border border-slate-600 text-[10px] text-slate-400 hover:text-slate-200 hover:border-slate-500 transition-all uppercase tracking-tight font-bold"
             >
-              <div className={`w-1.5 h-1.5 rounded-full ${isWorkshopMode ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'}`} />
-              <span className="hidden sm:inline">Live Workshop</span>
+              <span className="hidden sm:inline">{isWorkshopMode ? 'Analysis' : 'Workshop'}</span>
             </button>
             <AudioToggle current={parameters.current} heatInput={simulation.heatInput} />
             <button 
