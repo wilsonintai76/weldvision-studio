@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { WeldParameters, DistortionMetric, GMAWFrameResult } from '../types';
@@ -90,7 +90,7 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
   const [cameraMode, setCameraMode] = useState<'orbit' | 'front' | 'side' | 'top'>('orbit');
 
   // Generate temperature curve data based on heatInput and parameters
-  const tempChartData = React.useMemo(() => {
+  const tempChartData = useMemo(() => {
     const data = [];
     const peakTemp = 1530 + heatInput * 100; // rough estimation of peak temp based on heat input
     const coolingFactor = parameters.material === 'Aluminum' ? 0.08 : (parameters.material === 'Stainless Steel' ? 0.02 : 0.04);
