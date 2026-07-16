@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LAB_PRESETS } from '../utils/simulation';
 import { LabPreset } from '../types';
 import { Beaker, ShieldAlert, Sparkles, AlertTriangle, Play, Check } from 'lucide-react';
@@ -12,6 +12,11 @@ export const WeldingLabPresets: React.FC<WeldingLabPresetsProps> = ({
   onSelectPreset,
   activePresetId,
 }) => {
+  // Filter to GMAW-only presets for the hyper-focused architecture
+  const gmawPresets = useMemo(
+    () => LAB_PRESETS.filter((p) => p.parameters.process === 'GMAW' || !p.parameters.process),
+    []
+  );
   const getPresetIcon = (defect: string) => {
     switch (defect) {
       case 'None':
@@ -38,15 +43,15 @@ export const WeldingLabPresets: React.FC<WeldingLabPresetsProps> = ({
         <Beaker className="w-5 h-5 text-amber-500" />
         <div className="flex flex-col">
           <h2 className="font-display font-semibold text-lg text-slate-100">
-            Interactive Failure Lab
+            GMAW Failure Lab
           </h2>
-          <span className="text-xs text-slate-400">Instantly configure standard welding flaws or nominal specs to inspect.</span>
+          <span className="text-xs text-slate-400">Pre-configured GMAW scenarios targeting specific weld defects.</span>
         </div>
       </div>
 
       {/* Presets Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" id="presets-grid">
-        {LAB_PRESETS.map((preset) => {
+        {gmawPresets.map((preset) => {
           const isActive = activePresetId === preset.id;
           return (
             <button

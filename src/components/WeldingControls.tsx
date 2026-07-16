@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { WeldParameters, WeldingProcess, MaterialType, JointType, RestraintLevel } from '../types';
-import { Sliders, Settings, ShieldAlert, Zap, Flame, Wind } from 'lucide-react';
+import { Sliders, Settings, ShieldAlert, Zap, Flame, Wind, Gauge } from 'lucide-react';
+import { resolveAmperage } from '../utils/gmaw-telemetry';
 
 interface WeldingControlsProps {
   parameters: WeldParameters;
@@ -9,34 +10,31 @@ interface WeldingControlsProps {
 
 export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, onChange }) => {
   const handleSelectChange = (field: keyof WeldParameters, value: string) => {
-    const updated = { ...parameters, [field]: value };
-    
-    // Automatically adjust default gas flow if process is switched
-    if (field === 'process') {
-      if (value === 'SMAW') {
-        updated.gasFlow = 0;
-      } else if (parameters.gasFlow === 0) {
-        updated.gasFlow = 14;
-      }
-    }
-    
-    onChange(updated);
+    onChange({ ...parameters, [field]: value });
   };
 
   const handleSliderChange = (field: keyof WeldParameters, value: number) => {
     onChange({ ...parameters, [field]: value });
   };
 
-  const isGasRequired = parameters.process === 'GMAW' || parameters.process === 'GTAW';
+  // GMAW: Current is resolved from Wire Feed Speed, not directly set.
+  // Display the equivalent WFS for the current amperage setting.
+  const equivalentWFS = useMemo(() => {
+    // Inverse of I ≈ 0.55·W + 10 → W ≈ (I - 10) / 0.55
+    return Math.round((parameters.current - 10) / 0.55);
+  }, [parameters.current]);
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 shadow-xl text-slate-100 flex flex-col gap-6 md:gap-8" id="welding-controls-panel">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-4">
-        <Settings className="w-5 h-5 text-amber-500 animate-pulse" id="controls-header-icon" />
+        <Settings className="w-5 h-5 text-amber-500" id="controls-header-icon" />
         <h2 className="font-display font-semibold text-lg text-slate-100" id="controls-header-title">
-          Weld Machine Configuration
+          GMAW Machine Configuration
         </h2>
+        <span className="ml-auto text-[10px] font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+          MIG / GMAW
+        </span>
       </div>
 
       {/* Grid for Dropdowns */}
@@ -58,21 +56,22 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
           </div>
         </div>
 
-        {/* Process Selection */}
+        {/* Process — Locked to GMAW */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="process-select">WELDING PROCESS</label>
           <div className="min-h-[44px] flex items-center">
             <select
               id="process-select"
-              value={parameters.process}
-              onChange={(e) => handleSelectChange('process', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-200 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+              value="GMAW"
+              disabled
+              className="w-full bg-slate-950 border border-amber-500/30 rounded-lg py-2.5 px-3 text-sm text-amber-400 focus:outline-none cursor-not-allowed font-mono"
             >
-              <option value="GMAW">MIG / GMAW (Gas Metal Arc)</option>
-              <option value="GTAW">TIG / GTAW (Gas Tungsten Arc)</option>
-              <option value="SMAW">Stick / SMAW (Shielded Metal)</option>
+              <option value="GMAW">MIG / GMAW (Gas Metal Arc) — System Locked</option>
             </select>
           </div>
+          <span className="text-[10px] text-amber-500/60 font-mono px-1">
+            Fixed-torch geometry. No SMAW stick burn-off or GTAW dual-hand tracking.
+          </span>
         </div>
 
         {/* Joint Configuration */}
@@ -142,14 +141,19 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
           </div>
         </div>
 
-        {/* Amperage / Current */}
+        {/* Amperage / Current (GMAW: resolved from Wire Feed Speed) */}
         <div className="flex flex-col gap-3">
           <div className="flex justify-between text-sm">
             <span className="text-slate-300 font-medium flex items-center gap-2">
               <Zap className="w-4 h-4 text-amber-400" />
               Welding Current
             </span>
-            <span className="font-mono text-amber-400 font-bold">{parameters.current} Amps</span>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono text-slate-500">
+                ≈ {equivalentWFS} IPM WFS
+              </span>
+              <span className="font-mono text-amber-400 font-bold">{parameters.current} A</span>
+            </div>
           </div>
           <div className="min-h-[32px] flex items-center">
             <input
@@ -261,12 +265,12 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
           </div>
         </div>
 
-        {/* Shielding Gas Flow */}
-        <div className={`flex flex-col gap-3 transition-all duration-300 ${isGasRequired ? 'opacity-100 max-h-[160px]' : 'opacity-30 pointer-events-none max-h-0 overflow-hidden'}`}>
+        {/* Shielding Gas Flow — GMAW always requires gas */}
+        <div className="flex flex-col gap-3">
           <div className="flex justify-between text-sm">
             <span className="text-slate-300 font-medium flex items-center gap-2">
               <Wind className="w-4 h-4 text-cyan-400" />
-              Gas Flow Rate
+              Shielding Gas Flow
             </span>
             <span className="font-mono text-amber-400 font-bold">{parameters.gasFlow} L/min</span>
           </div>
@@ -279,7 +283,6 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
               value={parameters.gasFlow}
               onChange={(e) => handleSliderChange('gasFlow', parseInt(e.target.value))}
               className="w-full h-2.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500 focus:outline-none"
-              disabled={!isGasRequired}
             />
           </div>
           <div className="flex justify-between text-[10px] font-mono text-slate-500 px-1">
@@ -287,10 +290,16 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             <span>12 L/min</span>
             <span>25 L/min</span>
           </div>
-          {isGasRequired && parameters.gasFlow < 8 && (
+          {parameters.gasFlow < 8 && (
             <div className="flex items-center gap-1.5 text-[11px] leading-tight text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-md mt-1">
               <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-              <span>Lacking Gas Protection: Severe atmospheric nitrogen gas trapping. Massive porosity!</span>
+              <span>Lacking Gas Protection: Severe atmospheric gas trapping. Massive porosity!</span>
+            </div>
+          )}
+          {parameters.gasFlow > 19 && (
+            <div className="flex items-center gap-1.5 text-[11px] leading-tight text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded-md mt-1">
+              <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+              <span>Turbulent gas flow — may draw atmospheric air into the weld pool.</span>
             </div>
           )}
         </div>

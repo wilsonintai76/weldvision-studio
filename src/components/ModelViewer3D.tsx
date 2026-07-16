@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { WeldParameters, DistortionMetric } from '../types';
+import { WeldParameters, DistortionMetric, GMAWFrameResult } from '../types';
+import { thermalGradientColor } from '../utils/gmaw-telemetry';
 import { 
   Rotate3d, 
   Tag, 
@@ -38,12 +39,15 @@ interface ModelViewer3DProps {
   parameters: WeldParameters;
   distortion: DistortionMetric;
   heatInput: number;
+  /** Live GMAW telemetry frame result for real-time bead growth (optional) */
+  gmawFrame?: GMAWFrameResult | null;
 }
 
 export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
   parameters,
   distortion,
-  heatInput
+  heatInput,
+  gmawFrame,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -627,6 +631,32 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
     };
 
     animate();
+
+    // ── GMAW Real-Time Bead Growth ──────────────────────────────────────────
+    // Reacts to incoming gmawFrame telemetry to dynamically update
+    // bead emissive color and scale based on thermal gradient.
+    useEffect(() => {
+      if (!gmawFrame || !weldmentGroupRef.current) return;
+
+      const [r, g, b] = thermalGradientColor(gmawFrame.thermal_color_stop);
+      const thermalColor = new THREE.Color(r / 255, g / 255, b / 255);
+
+      // Traverse weldment group children to find bead meshes
+      weldmentGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshPhysicalMaterial) {
+          // Only affect bead meshes (not base plates) — beads have emissive set
+          if (child.material.emissiveIntensity > 0 || child.name.includes('bead')) {
+            // Pulse bead scale based on expansion factor
+            const expansion = 1 + gmawFrame.bead_expansion_factor * 0.3;
+            child.scale.set(expansion, expansion, 1);
+
+            // Shift thermal color based on frame
+            child.material.emissive = thermalColor;
+            child.material.emissiveIntensity = gmawFrame.trigger_pressed ? 2.0 : 0.5;
+          }
+        }
+      });
+    }, [gmawFrame]);
 
     // Resize Observer for responsive centering
     const resizeObserver = new ResizeObserver((entries) => {

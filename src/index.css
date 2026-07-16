@@ -7,3 +7,29 @@
   --font-display: "Outfit", var(--font-sans);
 }
 
+/* ── GMAW Thermal Gradient Animation ────────────────────────────────────── */
+/* Bright Yellow → Deep Cherry Red → Slag Gray */
+
+@keyframes thermal-cooling {
+  0%   { background-color: #FFE033; }  /* Bright Yellow — molten puddle */
+  50%  { background-color: #D42C1A; }  /* Deep Cherry Red — cooling bead */
+  100% { background-color: #6B6B6B; }  /* Slag Gray — solidified */
+}
+
+@keyframes bead-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1.0;  }
+}
+
+.thermal-gradient-bar {
+  background: linear-gradient(to right, #FFE033 0%, #FF8C00 25%, #D42C1A 50%, #8B3A3A 75%, #6B6B6B 100%);
+}
+
+.thermal-cooling-active {
+  animation: thermal-cooling 3s ease-in-out infinite;
+}
+
+.bead-growth-pulse {
+  animation: bead-pulse 0.5s ease-in-out infinite;
+}
+

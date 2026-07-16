@@ -31,7 +31,7 @@ import {
 
 const DEFAULT_PARAMETERS: WeldParameters = {
   material: 'Carbon Steel',
-  process: 'GMAW',
+  process: 'GMAW',       // Locked: GMAW-only hyper-focused architecture
   jointType: 'Butt Joint',
   restraint: 'Medium',
   thickness: 8,
@@ -40,7 +40,7 @@ const DEFAULT_PARAMETERS: WeldParameters = {
   speed: 6.5,
   preheat: 20,
   gasFlow: 14,
-  electrodeDiameter: 3.2,
+  electrodeDiameter: 0.9, // GMAW standard 0.9mm wire
 };
 
 export default function App() {
@@ -206,7 +206,7 @@ export default function App() {
             WeldSim<span className="text-amber-500 font-normal ml-0.5 md:ml-1">Studio</span>
           </h1>
           <span className="hidden lg:inline-block ml-4 px-2.5 py-0.5 rounded bg-slate-700 text-xs text-slate-300 border border-slate-600 truncate">
-            Project: AX-204 Shell Assembly
+            GMAW · MIG Welding Simulation Hub
           </span>
         </div>
         
@@ -242,9 +242,9 @@ export default function App() {
       {/* Intro Description banner */}
       <div className="bg-slate-900 border border-slate-800/80 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-base font-bold text-white tracking-tight">WELDING DEFECT &amp; DISTORTION MODELER</h2>
+          <h2 className="text-base font-bold text-white tracking-tight">GMAW DEFECT &amp; DISTORTION MODELER</h2>
           <p className="text-xs text-slate-400 max-w-2xl">
-            Analyze base metal solidification, localized heat absorption gradients, metallurgical defects, and thermal contraction warps in real time under AWS Structural Codes.
+            Analyze GMAW-specific solidification, heat input density gradients, metallurgical defects, and thermal contraction warps under AWS D1.1 Structural Codes.
           </p>
         </div>
         <div className="flex gap-2">

@@ -8,3 +8,19 @@ pages_build_output_dir = "./dist"
 # Worker AI binding — provides access to @cf/meta/llama-3.3-70b-instruct
 [ai]
 binding = "AI"
+
+# ── D1 Database — GMAW Sessions, Users, Bracket Calibration ───────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "weldsim-gmaw-db"
+database_id = ""
+
+# ── R2 Bucket — 60 Hz GMAW Telemetry Archive ─────────────────────────────────
+[[r2_buckets]]
+binding = "TELEMETRY"
+bucket_name = "weld-telemetry"
+
+# ── Environment-Specific Overrides ────────────────────────────────────────────
+[env.production]
+# Fill in after `wrangler d1 create` and `wrangler r2 bucket create`
+# d1_databases[0].database_id = "your-d1-database-id"

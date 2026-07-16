@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Play, BookOpen, Cpu, Layers, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Play, BookOpen, Cpu, Layers, ShieldCheck, ChevronRight, Gauge } from 'lucide-react';
 
 interface LandingPageProps {
   onStart: () => void;
@@ -19,9 +19,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       desc: "Utilize Llama-powered models to predict post-weld crack risks and distortion."
     },
     {
-      icon: <BookOpen className="w-5 h-5 text-emerald-400" />,
-      title: "Simulation Data",
-      desc: "Export and track thermal cooling curves and distortion metrics for LMS reporting."
+      icon: <Gauge className="w-5 h-5 text-emerald-400" />,
+      title: "Wire Feed Physics",
+      desc: "Real-time amperage resolution from WFS. Heat input density mapped to 3D bead geometry."
     }
   ];
 
@@ -35,15 +35,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
-            <ShieldCheck className="w-4 h-4 text-indigo-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300">TVET Simulation Module 4.2</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
+            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-300">GMAW Simulation · v2.0</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-display font-black text-white tracking-tighter mb-4">
-            3D VIRTUAL <span className="text-indigo-500">WELD LAB</span>
+            WELDSIM <span className="text-amber-500">STUDIO</span>
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Advanced metallurgical simulation and predictive distortion analysis platform for professional engineering education.
+            Hyper-focused GMAW (MIG) welding simulation. Fixed-torch geometry, deterministic thermophysics, and real-time 3D bead visualization for technical education.
           </p>
         </motion.div>
 
@@ -73,21 +73,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         >
           <button
             onClick={onStart}
-            className="group relative flex items-center gap-3 bg-white text-slate-950 px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-indigo-500 hover:text-white transition-all shadow-2xl shadow-indigo-500/20 active:scale-95"
+            className="group relative flex items-center gap-3 bg-amber-500 text-slate-950 px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-amber-400 transition-all shadow-2xl shadow-amber-500/20 active:scale-95"
           >
-            <span>Launch Simulation</span>
+            <span>Launch GMAW Simulator</span>
             <Play className="w-4 h-4 fill-current transition-transform group-hover:translate-x-1" />
             
             {/* Pulsing ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-white/20 animate-ping -z-10"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-amber-400/20 animate-ping -z-10"></div>
           </button>
           
           <div className="mt-8 flex items-center gap-6 opacity-30">
-            <span className="text-[10px] font-mono tracking-tighter uppercase">SCORM 2004 Compatible</span>
+            <span className="text-[10px] font-mono tracking-tighter uppercase">GMAW Constant Voltage</span>
             <div className="w-[1px] h-3 bg-slate-700"></div>
-            <span className="text-[10px] font-mono tracking-tighter uppercase">xAPI Ready</span>
+            <span className="text-[10px] font-mono tracking-tighter uppercase">0.9mm Steel Wire</span>
             <div className="w-[1px] h-3 bg-slate-700"></div>
-            <span className="text-[10px] font-mono tracking-tighter uppercase">LMS LTI v1.3</span>
+            <span className="text-[10px] font-mono tracking-tighter uppercase">AWS D1.1 Standards</span>
           </div>
         </motion.div>
       </div>
