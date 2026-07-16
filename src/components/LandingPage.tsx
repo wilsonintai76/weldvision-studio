@@ -40,7 +40,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-300">GMAW Simulation · v2.0</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-display font-black text-white tracking-tighter mb-4">
-            WELDSIM <span className="text-amber-500">STUDIO</span>
+            WELDVISION <span className="text-amber-500">STUDIO</span>
           </h1>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Hyper-focused GMAW (MIG) welding simulation. Fixed-torch geometry, deterministic thermophysics, and real-time 3D bead visualization for technical education.

@@ -1,5 +1,5 @@
 /**
- * GMAW Telemetry Engine — WeldSim Studio
+ * GMAW Telemetry Engine — WeldVision Studio
  *
  * Hyper-focused, single-process solver for GMAW (MIG) welding.
  * No SMAW stick burn-off math. No GTAW dual-hand tracking.

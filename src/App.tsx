@@ -203,7 +203,7 @@ export default function App() {
             <svg className="w-4 h-4 md:w-5 md:h-5 text-slate-900" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
           </div>
           <h1 className="text-sm md:text-lg font-bold tracking-tight text-white flex items-center shrink-0 truncate">
-            WeldSim<span className="text-amber-500 font-normal ml-0.5 md:ml-1">Studio</span>
+            WeldVision<span className="text-amber-500 font-normal ml-0.5 md:ml-1">Studio</span>
           </h1>
           <span className="hidden lg:inline-block ml-4 px-2.5 py-0.5 rounded bg-slate-700 text-xs text-slate-300 border border-slate-600 truncate">
             GMAW · MIG Welding Simulation Hub

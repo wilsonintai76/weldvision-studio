@@ -1,5 +1,5 @@
 {
-  "name": "WeldSim Studio",
+  "name": "WeldVision Studio",
   "description": "A production-grade welding simulation and authoring platform for technical education, focusing on metallurgy, thermal distortion, and industrial physics.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

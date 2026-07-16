@@ -482,7 +482,7 @@ export const LAB_PRESETS: LabPreset[] = [
 
 /**
  * GMAW-only simulation path that bridges the Android telemetry contract
- * directly into the existing WeldSim simulation engine.
+ * directly into the existing WeldVision simulation engine.
  *
  * Unlike simulateWelding() which uses manual parameter sliders, this function
  * takes a real GMAWTelemetryPacket from the MQTT broker and:
