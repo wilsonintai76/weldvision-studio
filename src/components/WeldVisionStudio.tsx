@@ -68,8 +68,16 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
   }, []);
 
   // ── Dual MQTT Ingestion Pipeline ───────────────────────────────────────────
+  // Only activates when a student is selected and we're on a compatible origin.
+  // HTTPS pages cannot connect to insecure WS brokers — MQTT is offline on production.
 
   useEffect(() => {
+    const isSecure = window.location.protocol === 'https:';
+    if (isSecure) {
+      console.log('[MQTT] HTTPS detected — MQTT disabled (requires local LAN or WSS proxy).');
+      return;
+    }
+
     let localClient: mqtt.MqttClient | null = null;
     let cloudClient: mqtt.MqttClient | null = null;
 

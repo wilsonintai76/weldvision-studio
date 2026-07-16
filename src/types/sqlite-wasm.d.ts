@@ -1,4 +1,4 @@
-declare module 'https://cdn.jsdelivr.net/npm/@aspect-build/aspect-sqlite3-wasm@0.0.7/dist/sqlite3.wasm.esm.js' {
+declare module 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js' {
   const initSqlJs: (config?: any) => Promise<any>;
   export default initSqlJs;
 }
