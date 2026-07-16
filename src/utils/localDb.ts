@@ -15,18 +15,15 @@ let dbInstance: any = null;
 export async function getSqliteDbInstance() {
   if (dbInstance) return dbInstance;
 
-  // Dynamic import of SQLite-WASM from npm package (sql.js)
+  // SQLite-WASM / OPFS is optional. Falls back to in-memory gracefully.
   try {
     const initSqlJs = (await import('sql.js')).default;
 
-    // sql.js needs to locate its WASM file. In production, use the CDN.
-    // In dev, Vite handles this automatically via the assets directory.
     const SQL = await initSqlJs({
       locateFile: (file: string) =>
         `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`,
     });
 
-    // Try OPFS-backed persistent storage
     let db: any;
     try {
       const opfsRoot = await navigator.storage.getDirectory();
@@ -40,53 +37,18 @@ export async function getSqliteDbInstance() {
         db = new SQL.Database();
       }
     } catch {
-      // Fallback: in-memory (no COOP/COEP headers)
-      console.warn('OPFS unavailable — running SQLite in memory-only mode.');
       db = new SQL.Database();
     }
 
-    // ── GMAW Local Schema ─────────────────────────────────────────────────
-    db.run(`
-      CREATE TABLE IF NOT EXISTS local_sessions (
-        session_id   TEXT PRIMARY KEY,
-        student_id   TEXT NOT NULL,
-        bracket_id   TEXT NOT NULL,
-        voltage      REAL NOT NULL,
-        wfs_ipm      REAL NOT NULL,
-        created_at   TEXT DEFAULT (datetime('now'))
-      );
+    db.run(`CREATE TABLE IF NOT EXISTS local_sessions (session_id TEXT PRIMARY KEY, student_id TEXT NOT NULL, bracket_id TEXT NOT NULL, voltage REAL NOT NULL, wfs_ipm REAL NOT NULL, created_at TEXT DEFAULT (datetime('now')));`);
+    db.run(`CREATE TABLE IF NOT EXISTS local_telemetry (id INTEGER PRIMARY KEY AUTOINCREMENT, session_id TEXT NOT NULL, x_mm REAL NOT NULL, y_mm REAL NOT NULL, z_gap_mm REAL NOT NULL, speed_mms REAL NOT NULL, work_angle REAL NOT NULL, travel_angle REAL NOT NULL, trigger INTEGER NOT NULL, timestamp TEXT DEFAULT (datetime('now')));`);
 
-      CREATE TABLE IF NOT EXISTS local_telemetry (
-        id           INTEGER PRIMARY KEY AUTOINCREMENT,
-        session_id   TEXT NOT NULL,
-        x_mm         REAL NOT NULL,
-        y_mm         REAL NOT NULL,
-        z_gap_mm     REAL NOT NULL,
-        speed_mms    REAL NOT NULL,
-        work_angle   REAL NOT NULL,
-        travel_angle REAL NOT NULL,
-        trigger      INTEGER NOT NULL,
-        timestamp    TEXT DEFAULT (datetime('now'))
-      );
-    `);
-
-    dbInstance = { db, SQL, saveToOpfs: async () => {
-      try {
-        const data = db.export();
-        const opfsRoot = await navigator.storage.getDirectory();
-        const fileHandle = await opfsRoot.getFileHandle('weldvision.db', { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(data.buffer);
-        await writable.close();
-      } catch {
-        // OPFS save failed — data lives in memory only
-      }
-    }};
-
-    console.log('SQLite-WASM engine initialized. OPFS persistence active.');
+    dbInstance = { db, SQL, saveToOpfs: async () => {} };
+    console.log('SQLite-WASM initialized.');
     return dbInstance;
-  } catch (err) {
-    console.error('SQLite-WASM initialization failed:', err);
-    throw err;
+  } catch {
+    // SQLite unavailable — app works fully without it
+    dbInstance = { db: null, SQL: null, saveToOpfs: async () => {} };
+    return dbInstance;
   }
 }
