@@ -37,70 +37,27 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
         </span>
       </div>
 
-      {/* Grid for Dropdowns */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        {/* Material — Early dev: locked to Carbon Steel */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="material-select">BASE MATERIAL</label>
-          <div className="min-h-11 flex items-center">
-            <select
-              id="material-select"
-              value="Carbon Steel"
-              disabled
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 px-3 text-sm text-slate-500 focus:outline-none cursor-not-allowed font-mono"
-            >
-              <option value="Carbon Steel">Carbon Steel (A36) — Locked</option>
-            </select>
-          </div>
+      {/* Info Labels — matches Android Trainer */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2">
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Material</span>
+          <p className="text-sm text-slate-300 font-medium">Carbon Steel (A36)</p>
         </div>
-
-        {/* Process — Locked to GMAW */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="process-select">WELDING PROCESS</label>
-          <div className="min-h-11 flex items-center">
-            <select
-              id="process-select"
-              value="GMAW"
-              disabled
-              className="w-full bg-slate-950 border border-amber-500/30 rounded-lg py-2.5 px-3 text-sm text-amber-400 focus:outline-none cursor-not-allowed font-mono"
-            >
-              <option value="GMAW">MIG / GMAW (Gas Metal Arc) — System Locked</option>
-            </select>
-          </div>
-          <span className="text-[10px] text-amber-500/60 font-mono px-1">
-            Fixed-torch geometry. No SMAW stick burn-off or GTAW dual-hand tracking.
-          </span>
+        <div className="bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2">
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Joint</span>
+          <p className="text-sm text-slate-300 font-medium">Butt Joint</p>
         </div>
-
-        {/* Joint — Early dev: locked to Butt Joint */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="joint-select">JOINT CONFIGURATION</label>
-          <div className="min-h-11 flex items-center">
-            <select
-              id="joint-select"
-              value="Butt Joint"
-              disabled
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 px-3 text-sm text-slate-500 focus:outline-none cursor-not-allowed font-mono"
-            >
-              <option value="Butt Joint">Butt Joint (Single-V) — Locked</option>
-            </select>
+        <div className="bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2 flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Restraint</span>
+            <p className="text-sm text-slate-300 font-medium">{parameters.restraint === 'Medium' ? 'ON' : 'OFF'}</p>
           </div>
-        </div>
-
-        {/* Restraint — Early dev: None or Medium only */}
-        <div className="flex flex-col gap-2">
-          <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="restraint-select">CLAMPING & RESTRAINT</label>
-          <div className="min-h-11 flex items-center">
-            <select
-              id="restraint-select"
-              value={parameters.restraint}
-              onChange={(e) => handleSelectChange('restraint', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-200 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
-            >
-              <option value="None">None (Free to Warp)</option>
-              <option value="Medium">Medium (Soft Clamps)</option>
-            </select>
-          </div>
+          <button
+            onClick={() => handleSelectChange('restraint', parameters.restraint === 'Medium' ? 'None' : 'Medium')}
+            className={`w-10 h-5 rounded-full transition-colors ${parameters.restraint === 'Medium' ? 'bg-amber-500' : 'bg-slate-700'}`}
+          >
+            <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${parameters.restraint === 'Medium' ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
         </div>
       </div>
 
