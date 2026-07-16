@@ -13,7 +13,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "weldvision-gmaw-db"
-database_id = ""
+database_id = "c1c1f0c2-8d97-4782-ad94-0ff2c2a837a5"
 migrations_dir = "./migrations"
 
 # ── R2 Bucket — 60 Hz GMAW Telemetry Archive ─────────────────────────────────
