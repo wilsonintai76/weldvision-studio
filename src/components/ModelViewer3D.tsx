@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { WeldParameters, DistortionMetric, GMAWFrameResult } from '../types';
@@ -35,6 +35,13 @@ interface Annotation {
   timestamp: string;
 }
 
+export interface ModelViewer3DHandle {
+  updateSimulationMesh: (
+    x: number, y: number, z: number,
+    heatInput: number, triggerPressed: boolean
+  ) => void;
+}
+
 interface ModelViewer3DProps {
   parameters: WeldParameters;
   distortion: DistortionMetric;
@@ -43,12 +50,12 @@ interface ModelViewer3DProps {
   gmawFrame?: GMAWFrameResult | null;
 }
 
-export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
+export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>(({
   parameters,
   distortion,
   heatInput,
   gmawFrame,
-}) => {
+}, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -56,6 +63,29 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
   const controlsRef = useRef<OrbitControls | null>(null);
   const weldmentGroupRef = useRef<THREE.Group | null>(null);
   const annotationPinsGroupRef = useRef<THREE.Group | null>(null);
+
+  // ── Expose updateSimulationMesh to WeldVisionStudio MQTT pipeline ────────
+  useImperativeHandle(ref, () => ({
+    updateSimulationMesh: (x: number, y: number, z: number, heat: number, trigger: boolean) => {
+      if (!weldmentGroupRef.current) return;
+
+      // Update bead position based on telemetry coordinates
+      const [r, g, b] = thermalGradientColor(trigger ? 0.1 : 0.9);
+      const thermalColor = new THREE.Color(r / 255, g / 255, b / 255);
+
+      weldmentGroupRef.current.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshPhysicalMaterial) {
+          if (child.material.emissiveIntensity > 0 || child.name.includes('bead')) {
+            // Scale bead based on heat input
+            const expansion = Math.min(1.5, 1 + heat * 0.5);
+            child.scale.set(expansion, expansion, 1);
+            child.material.emissive = thermalColor;
+            child.material.emissiveIntensity = trigger ? 2.0 : 0.5;
+          }
+        }
+      });
+    },
+  }), []);
   
   // States
   const [showHeatmap, setShowHeatmap] = useState<boolean>(true);
@@ -1149,4 +1179,4 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
       </div>
     </div>
   );
-};
+});

@@ -1,17 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { WeldParameters, LabPreset } from './types';
 import { WeldingControls } from './components/WeldingControls';
 import { JointVisualizer } from './components/JointVisualizer';
 import { DistortionVisualizer } from './components/DistortionVisualizer';
 import { DefectAnalyzer } from './components/DefectAnalyzer';
 import { WeldingLabPresets } from './components/WeldingLabPresets';
-import { ModelViewer3D } from './components/ModelViewer3D';
+import { ModelViewer3D, ModelViewer3DHandle } from './components/ModelViewer3D';
 import { DefectGallery } from './components/DefectGallery';
 import { WeldQuiz } from './components/WeldQuiz';
 import { AudioToggle } from './components/AudioToggle';
 import { simulateWelding } from './utils/simulation';
 import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/LandingPage';
+import { WeldVisionStudio } from './components/WeldVisionStudio';
 import { 
   Flame, 
   Layers, 
@@ -45,10 +46,14 @@ const DEFAULT_PARAMETERS: WeldParameters = {
 
 export default function App() {
   const [hasStarted, setHasStarted] = useState(false);
+  const [isWorkshopMode, setIsWorkshopMode] = useState(false);
   const [parameters, setParameters] = useState<WeldParameters>(DEFAULT_PARAMETERS);
   const [selectedDefect, setSelectedDefect] = useState<string | null>(null);
   const [activePresetId, setActivePresetId] = useState<string | null>('perfect');
   const [activeTab, setActiveTab] = useState<'bead' | 'distortion' | '3d' | 'gallery' | 'quiz'>('bead');
+
+  // Ref to the Three.js ModelViewer3D for MQTT pipeline access
+  const modelViewerRef = useRef<ModelViewer3DHandle>(null);
 
   // Inactivity timeout logic
   useEffect(() => {
@@ -188,6 +193,20 @@ export default function App() {
     <AnimatePresence mode="wait">
       {!hasStarted ? (
         <LandingPage key="landing" onStart={() => setHasStarted(true)} />
+      ) : isWorkshopMode ? (
+        <WeldVisionStudio
+          key="workshop"
+          threeJsScene={
+            <div className="w-full h-full">
+              <ModelViewer3D
+                ref={modelViewerRef}
+                parameters={parameters}
+                distortion={simulation.distortion}
+                heatInput={simulation.heatInput}
+              />
+            </div>
+          }
+        />
       ) : (
         <motion.div 
           key="lab"
@@ -224,6 +243,17 @@ export default function App() {
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="hidden sm:inline">Analysis Mode</span>
             </div>
+            <button
+              onClick={() => setIsWorkshopMode(!isWorkshopMode)}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tight transition-all ${
+                isWorkshopMode
+                  ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'
+                  : 'bg-slate-700/50 border border-slate-600 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30'
+              }`}
+            >
+              <div className={`w-1.5 h-1.5 rounded-full ${isWorkshopMode ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'}`} />
+              <span className="hidden sm:inline">Live Workshop</span>
+            </button>
             <AudioToggle current={parameters.current} heatInput={simulation.heatInput} />
             <button 
               onClick={handleReset}
