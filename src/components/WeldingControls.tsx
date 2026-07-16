@@ -39,19 +39,17 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
 
       {/* Grid for Dropdowns */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        {/* Material Selection */}
+        {/* Material — Early dev: locked to Carbon Steel */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="material-select">BASE MATERIAL</label>
           <div className="min-h-11 flex items-center">
             <select
               id="material-select"
-              value={parameters.material}
-              onChange={(e) => handleSelectChange('material', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-200 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+              value="Carbon Steel"
+              disabled
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 px-3 text-sm text-slate-500 focus:outline-none cursor-not-allowed font-mono"
             >
-              <option value="Carbon Steel">Carbon Steel (A36)</option>
-              <option value="Stainless Steel">Stainless Steel (304)</option>
-              <option value="Aluminum">Aluminum (6061-T6)</option>
+              <option value="Carbon Steel">Carbon Steel (A36) — Locked</option>
             </select>
           </div>
         </div>
@@ -74,25 +72,22 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
           </span>
         </div>
 
-        {/* Joint Configuration */}
+        {/* Joint — Early dev: locked to Butt Joint */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="joint-select">JOINT CONFIGURATION</label>
           <div className="min-h-11 flex items-center">
             <select
               id="joint-select"
-              value={parameters.jointType}
-              onChange={(e) => handleSelectChange('jointType', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2.5 px-3 text-sm text-slate-200 focus:outline-none focus:border-amber-500 transition-colors cursor-pointer"
+              value="Butt Joint"
+              disabled
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 px-3 text-sm text-slate-500 focus:outline-none cursor-not-allowed font-mono"
             >
-              <option value="Butt Joint">Butt Joint (Single-V)</option>
-              <option value="T-Joint">T-Joint (Double Fillet)</option>
-              <option value="T-Joint (Single Fillet)">T-Joint (Single Fillet)</option>
-              <option value="Lap Joint">Lap Joint (Fillet)</option>
+              <option value="Butt Joint">Butt Joint (Single-V) — Locked</option>
             </select>
           </div>
         </div>
 
-        {/* Restraint Configuration */}
+        {/* Restraint — Early dev: None or Medium only */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="restraint-select">CLAMPING & RESTRAINT</label>
           <div className="min-h-11 flex items-center">
@@ -104,7 +99,6 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             >
               <option value="None">None (Free to Warp)</option>
               <option value="Medium">Medium (Soft Clamps)</option>
-              <option value="High">High (Rigid Fixture / Heavy Tack)</option>
             </select>
           </div>
         </div>
