@@ -54,30 +54,26 @@ export default function App() {
   const [activePresetId, setActivePresetId] = useState<string | null>('perfect');
   const [activeTab, setActiveTab] = useState<'bead' | 'distortion' | '3d' | 'gallery' | 'quiz'>('bead');
 
-  // Ref to the Three.js ModelViewer3D for MQTT pipeline access
+  // Use callback ref pattern for ModelViewer3D — avoids forwardRef complexity
   const modelViewerRef = useRef<ModelViewer3DHandle>(null);
 
-  // Inactivity timeout logic
+  // Inactivity timeout
   useEffect(() => {
-    if (!hasStarted) return;
+    if (!hasStarted) return undefined;
     
-    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
-    let timeoutId: NodeJS.Timeout;
+    const INACTIVITY_LIMIT = 5 * 60 * 1000;
+    const timeoutId = setTimeout(() => { setHasStarted(false); }, INACTIVITY_LIMIT);
 
     const resetTimer = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setHasStarted(false);
-      }, INACTIVITY_LIMIT);
+      clearTimeout(timeoutId);
+      setTimeout(() => { setHasStarted(false); }, INACTIVITY_LIMIT);
     };
 
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
     events.forEach(name => document.addEventListener(name, resetTimer, true));
     
-    resetTimer();
-
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      clearTimeout(timeoutId);
       events.forEach(name => document.removeEventListener(name, resetTimer, true));
     };
   }, [hasStarted]);
