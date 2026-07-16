@@ -42,7 +42,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
         {/* Material Selection */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="material-select">BASE MATERIAL</label>
-          <div className="min-h-[44px] flex items-center">
+          <div className="min-h-11 flex items-center">
             <select
               id="material-select"
               value={parameters.material}
@@ -59,7 +59,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
         {/* Process — Locked to GMAW */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="process-select">WELDING PROCESS</label>
-          <div className="min-h-[44px] flex items-center">
+          <div className="min-h-11 flex items-center">
             <select
               id="process-select"
               value="GMAW"
@@ -77,7 +77,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
         {/* Joint Configuration */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="joint-select">JOINT CONFIGURATION</label>
-          <div className="min-h-[44px] flex items-center">
+          <div className="min-h-11 flex items-center">
             <select
               id="joint-select"
               value={parameters.jointType}
@@ -95,7 +95,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
         {/* Restraint Configuration */}
         <div className="flex flex-col gap-2">
           <label className="text-xs font-mono text-slate-400 uppercase tracking-wider" htmlFor="restraint-select">CLAMPING & RESTRAINT</label>
-          <div className="min-h-[44px] flex items-center">
+          <div className="min-h-11 flex items-center">
             <select
               id="restraint-select"
               value={parameters.restraint}
@@ -123,7 +123,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             <span className="text-slate-300 font-medium">Plate Thickness</span>
             <span className="font-mono text-amber-400 font-bold">{parameters.thickness} mm</span>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="2"
@@ -155,7 +155,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
               <span className="font-mono text-amber-400 font-bold">{parameters.current} A</span>
             </div>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="40"
@@ -194,7 +194,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             </span>
             <span className="font-mono text-amber-400 font-bold">{parameters.voltage} V</span>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="10"
@@ -220,7 +220,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             </span>
             <span className="font-mono text-amber-400 font-bold">{parameters.speed} mm/s</span>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="1.5"
@@ -247,7 +247,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             </span>
             <span className="font-mono text-amber-400 font-bold">{parameters.preheat} °C</span>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="20"
@@ -274,7 +274,7 @@ export const WeldingControls: React.FC<WeldingControlsProps> = ({ parameters, on
             </span>
             <span className="font-mono text-amber-400 font-bold">{parameters.gasFlow} L/min</span>
           </div>
-          <div className="min-h-[32px] flex items-center">
+          <div className="min-h-8 flex items-center">
             <input
               type="range"
               min="0"

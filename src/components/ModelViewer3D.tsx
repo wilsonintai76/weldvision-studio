@@ -906,13 +906,13 @@ export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>
       </div>
 
       {/* Main Grid: Left is 3D Workspace, Right is Annotation Side-Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-[460px]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 flex-1 min-h-115">
         
         {/* Left Side: 3D Canvas area */}
-        <div className="lg:col-span-8 relative flex flex-col bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 group">
+        <div className="lg:col-span-8 relative flex flex-col bg-linear-to-b from-slate-700 via-slate-800 to-slate-900 group">
           
           {/* Floating Instructions Banner - Hidden on mobile to reduce clutter */}
-          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 pointer-events-none hidden md:flex">
+          <div className="absolute top-4 left-4 z-10 flex-col gap-1.5 pointer-events-none hidden md:flex">
             <div className="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-400 flex items-center gap-2">
               <Compass className="w-3.5 h-3.5 text-amber-500" />
               <span>DRAG TO ROTATE | SCROLL/BUTTONS TO ZOOM</span>
@@ -940,7 +940,7 @@ export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>
           </div>
 
           {/* Live Canvas element */}
-          <div className="flex-1 w-full h-full min-h-[380px] relative">
+          <div className="flex-1 w-full h-full min-h-95 relative">
             <div 
               ref={containerRef} 
               className="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"
@@ -1089,7 +1089,7 @@ export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>
           </div>
 
           {/* Saved Annotations List */}
-          <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 max-h-[300px] lg:max-h-[none]">
+          <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 max-h-75 lg:max-h-none">
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
                 Pinned Annotations ({annotations.length})

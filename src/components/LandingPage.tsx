@@ -84,9 +84,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           
           <div className="mt-8 flex items-center gap-6 opacity-30">
             <span className="text-[10px] font-mono tracking-tighter uppercase">GMAW Constant Voltage</span>
-            <div className="w-[1px] h-3 bg-slate-700"></div>
+            <div className="w-px h-3 bg-slate-700"></div>
             <span className="text-[10px] font-mono tracking-tighter uppercase">0.9mm Steel Wire</span>
-            <div className="w-[1px] h-3 bg-slate-700"></div>
+            <div className="w-px h-3 bg-slate-700"></div>
             <span className="text-[10px] font-mono tracking-tighter uppercase">AWS D1.1 Standards</span>
           </div>
         </motion.div>

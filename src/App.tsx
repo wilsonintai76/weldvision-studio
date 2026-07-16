@@ -238,7 +238,7 @@ export default function App() {
               <LogOut className="w-3 h-3" />
               <span className="hidden sm:inline">Exit Session</span>
             </button>
-            <div className="w-[1px] h-4 bg-slate-700 mx-0.5"></div>
+            <div className="w-px h-4 bg-slate-700 mx-0.5"></div>
             <div className="flex items-center gap-1.5 px-1.5 md:px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 shrink-0">
               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               <span className="hidden sm:inline">Analysis Mode</span>
@@ -361,7 +361,7 @@ export default function App() {
           <div className="bg-slate-900 border border-slate-800 rounded-xl p-1.5 flex flex-wrap gap-1.5">
             <button
               onClick={() => setActiveTab('bead')}
-              className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-20 py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 activeTab === 'bead'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-950/40'
@@ -374,7 +374,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('distortion')}
-              className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-20 py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 activeTab === 'distortion'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-950/40'
@@ -387,7 +387,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('3d')}
-              className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-20 py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 activeTab === '3d'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-950/40'
@@ -399,7 +399,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('gallery')}
-              className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-20 py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 activeTab === 'gallery'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-950/40'
@@ -411,7 +411,7 @@ export default function App() {
             </button>
             <button
               onClick={() => setActiveTab('quiz')}
-              className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-20 py-2 px-3 rounded-lg text-xs font-semibold font-display tracking-wide transition-all duration-200 flex items-center justify-center gap-1.5 ${
                 activeTab === 'quiz'
                   ? 'bg-amber-500 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-950/40'

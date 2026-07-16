@@ -153,7 +153,7 @@ export const PredictiveAnalysis: React.FC<PredictiveAnalysisProps> = ({
               animate={{ opacity: 1, y: 0 }}
               className="relative"
             >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/40 to-purple-500/40 rounded-xl blur-sm opacity-50"></div>
+              <div className="absolute -inset-0.5 bg-linear-to-r from-indigo-500/40 to-purple-500/40 rounded-xl blur-sm opacity-50"></div>
               <div className="relative bg-slate-950/80 backdrop-blur-sm border border-indigo-500/20 rounded-xl p-5 shadow-inner">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>

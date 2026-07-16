@@ -231,7 +231,7 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
   return (
     <div className="flex h-screen w-full bg-slate-900 text-slate-100 font-sans">
       {/* ── LEFT SIDEBAR: Classroom Roster & Active MQTT Sessions ── */}
-      <div className="w-1/4 min-w-[280px] border-r border-slate-800 p-4 flex flex-col justify-between">
+      <div className="w-1/4 min-w-70 border-r border-slate-800 p-4 flex flex-col justify-between">
         <div className="flex flex-col gap-4">
           <h2 className="text-xl font-black tracking-wide text-amber-400">
             WELDVISION STUDIO
@@ -318,7 +318,7 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
         </div>
 
         {/* ── Three.js Canvas Mount Point ── */}
-        <div className="flex-grow rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner">
+        <div className="grow rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner">
           {threeJsScene || (
             <div className="w-full h-full flex items-center justify-center text-slate-600 italic">
               [ Mount point for Three.js Defect/Distortion Canvas Component ]
