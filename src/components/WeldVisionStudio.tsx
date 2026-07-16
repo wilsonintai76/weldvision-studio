@@ -17,7 +17,7 @@ import { GMAWTelemetryPacket } from '../types';
 // ── Broker Configuration ─────────────────────────────────────────────────────
 
 const LOCAL_LAN_BROKER = 'ws://192.168.1.45:9001/mqtt';
-const CLOUD_WAN_BROKER = 'wss://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8884/mqtt';
+const FALLBACK_CLOUD_BROKER = 'wss://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8884/mqtt';
 
 // ── GMAW Thermophysics Inline Functions ──────────────────────────────────────
 
@@ -77,7 +77,23 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
     let cloudClient: any = null;
     let cleanup = false;
 
-    import('mqtt').then((mqtt) => {
+    // Fetch MQTT credentials from Cloudflare secrets via API
+    async function initMQTT() {
+      let brokerUrl = FALLBACK_CLOUD_BROKER;
+      let mqttUser = '';
+      let mqttPass = '';
+
+      try {
+        const res = await fetch('/api/mqtt-config');
+        if (res.ok) {
+          const cfg = await res.json() as { broker?: string; username?: string; password?: string };
+          brokerUrl = cfg.broker || brokerUrl;
+          mqttUser = cfg.username || '';
+          mqttPass = cfg.password || '';
+        }
+      } catch { /* Use fallback */ }
+
+      const mqtt = await import('mqtt');
       if (cleanup) return;
 
       const handleIncomingFrame = (topic: string, message: Buffer) => {
@@ -123,12 +139,19 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
 
       // Cloud WAN broker — WSS always available
       try {
-        cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'wilsonintai76', password: 'Gw3Nwi78On@76', reconnectPeriod: 5000, connectTimeout: 8000 });
+        cloudClient = mqtt.connect(brokerUrl, {
+          username: mqttUser,
+          password: mqttPass,
+          reconnectPeriod: 5000,
+          connectTimeout: 8000,
+        });
         cloudClient.on('connect', () => { if (!cleanup) cloudClient!.subscribe('weldvision/room_A/+/live'); });
         cloudClient.on('message', handleIncomingFrame);
         cloudClient.on('error', () => {});
       } catch {}
-    }).catch(() => {});
+    }
+
+    initMQTT().catch(() => {});
 
     return () => {
       cleanup = true;

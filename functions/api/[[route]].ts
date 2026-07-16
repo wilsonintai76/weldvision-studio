@@ -5,8 +5,11 @@ import { handle } from 'hono/cloudflare-pages';
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type Bindings = {
-  AI: Ai;  // Cloudflare Workers AI binding (declared in wrangler.toml)
-  DB: D1Database;  // D1 database binding (weldvision-gmaw-db)
+  AI: Ai;
+  DB: D1Database;
+  MQTT_USERNAME?: string;  // Cloudflare Pages secret
+  MQTT_PASSWORD?: string;  // Cloudflare Pages secret
+  MQTT_BROKER?: string;    // Cloudflare Pages secret
 };
 
 interface PredictiveAnalysisBody {
@@ -342,6 +345,16 @@ gmawRoutes.post('/session', async (c) => {
 
 // Mount GMAW routes at /api/gmaw (served at /api/gmaw by Pages Functions)
 app.route('/api/gmaw', gmawRoutes);
+
+// GET /api/mqtt-config — Returns MQTT broker credentials from Cloudflare secrets
+// No auth check needed since the user is already authenticated in the frontend
+app.get('/api/mqtt-config', (c) => {
+  return c.json({
+    broker: c.env.MQTT_BROKER || 'wss://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8884/mqtt',
+    username: c.env.MQTT_USERNAME || '',
+    password: c.env.MQTT_PASSWORD || '',
+  });
+});
 
 // ── Export for Cloudflare Pages Functions ────────────────────────────────────
 // The `handle` adapter converts Hono's app into a Pages Functions handler.
