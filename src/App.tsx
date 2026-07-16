@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { WeldParameters, LabPreset } from './types';
 import { WeldingControls } from './components/WeldingControls';
 import { JointVisualizer } from './components/JointVisualizer';
 import { DistortionVisualizer } from './components/DistortionVisualizer';
 import { DefectAnalyzer } from './components/DefectAnalyzer';
 import { WeldingLabPresets } from './components/WeldingLabPresets';
-import { ModelViewer3D, ModelViewer3DHandle } from './components/ModelViewer3D';
+import { ModelViewer3D } from './components/ModelViewer3D';
 import { DefectGallery } from './components/DefectGallery';
 import { WeldQuiz } from './components/WeldQuiz';
 import { AudioToggle } from './components/AudioToggle';
@@ -53,9 +53,6 @@ export default function App() {
   const [selectedDefect, setSelectedDefect] = useState<string | null>(null);
   const [activePresetId, setActivePresetId] = useState<string | null>('perfect');
   const [activeTab, setActiveTab] = useState<'bead' | 'distortion' | '3d' | 'gallery' | 'quiz'>('bead');
-
-  // Use callback ref pattern for ModelViewer3D — avoids forwardRef complexity
-  const modelViewerRef = useRef<ModelViewer3DHandle>(null);
 
   // Inactivity timeout
   useEffect(() => {
@@ -194,7 +191,6 @@ export default function App() {
       ) : isWorkshopMode ? (
         <WeldVisionStudio key="workshop">
           <ModelViewer3D
-            ref={modelViewerRef}
             parameters={parameters}
             distortion={simulation.distortion}
             heatInput={simulation.heatInput}
