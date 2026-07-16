@@ -3,37 +3,7 @@ import { Brain, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WeldParameters, DistortionMetric, MetallurgyResult } from '../types';
 import { calculateHICRisk } from '../utils/metallurgy';
-// AppType is exported from the Hono Worker for future Hono RPC integration
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { AppType } from '../../functions/api/[[route]]';
-
-// Typed API request body matching the Worker's PredictiveAnalysisBody interface
-interface AnalysisRequestBody {
-  parameters: WeldParameters;
-  distortion: DistortionMetric;
-  heatInput: number;
-  mitigatedDistortion: DistortionMetric;
-  metallurgy: MetallurgyResult;
-}
-
-// Typed API response
-interface PredictiveAnalysisResponse {
-  riskScore: number;
-  explanation: string;
-}
-
-// Typed fetch wrapper for /api/predictive-analysis (backed by the Hono Worker)
-async function callPredictiveAnalysis(
-  body: AnalysisRequestBody
-): Promise<PredictiveAnalysisResponse> {
-  const res = await fetch('/api/predictive-analysis', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Server error: ${res.status}`);
-  return res.json() as Promise<PredictiveAnalysisResponse>;
-}
+import { predictiveAnalysis } from '../api/client';
 
 interface PredictiveAnalysisProps {
   parameters: WeldParameters;
@@ -67,8 +37,14 @@ export const PredictiveAnalysis: React.FC<PredictiveAnalysisProps> = ({
   const analyzeRisk = async () => {
     setIsAnalyzing(true);
     try {
-      const data = await callPredictiveAnalysis({
-        parameters,
+      const data = await predictiveAnalysis({
+        parameters: {
+          material: parameters.material,
+          thickness: parameters.thickness,
+          jointType: parameters.jointType,
+          process: parameters.process,
+          preheat: parameters.preheat,
+        },
         distortion,
         heatInput,
         mitigatedDistortion,

@@ -5,7 +5,8 @@ import { handle } from 'hono/cloudflare-pages';
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type Bindings = {
-  AI: Ai; // Cloudflare Workers AI binding (declared in wrangler.toml)
+  AI: Ai;  // Cloudflare Workers AI binding (declared in wrangler.toml)
+  DB: D1Database;  // D1 database binding (weldvision-gmaw-db)
 };
 
 interface PredictiveAnalysisBody {
@@ -116,7 +117,7 @@ app.use('*', cors());
 // POST /api/predictive-analysis
 // Accepts weld parameters, calls Llama 3.3 70B via Workers AI,
 // returns a professional metallurgical crack-risk explanation.
-app.post('/api/predictive-analysis', async (c) => {
+app.post('/predictive-analysis', async (c) => {
   let body: PredictiveAnalysisBody;
 
   try {
@@ -163,11 +164,14 @@ app.post('/api/predictive-analysis', async (c) => {
 
 });
 
-// POST /api/gmaw/ingest
-// Accepts a single GMAW telemetry frame, runs the thermophysics solver,
-// and returns the GMAWFrameResult for Three.js consumption.
-// Used by: browser client (via MQTT bridge) or offline queue sync.
-app.post('/api/gmaw/ingest', async (c) => {
+// ── GMAW Sub-Router ─────────────────────────────────────────────────────────
+// Using a sub-router enables proper type inference for Hono RPC.
+// Routes are available at /api/gmaw/ingest and /api/gmaw/session
+
+const gmawRoutes = new Hono<{ Bindings: Bindings }>();
+
+// POST /ingest — Single GMAW telemetry frame → thermophysics solver → Three.js bead result
+gmawRoutes.post('/ingest', async (c) => {
   let body: GMAWTelemetryBody;
 
   try {
@@ -176,50 +180,33 @@ app.post('/api/gmaw/ingest', async (c) => {
     return c.json({ error: 'Invalid JSON body. Expected GMAW telemetry packet.' }, 400);
   }
 
-  // Validate required fields
   const { meta, settings, telemetry } = body;
   if (!meta?.session_id || !settings?.voltage || !telemetry) {
     return c.json({ error: 'Missing required fields: meta.session_id, settings.voltage, telemetry' }, 400);
   }
 
-  // Extract optional thickness from query or default to 6 mm
   const thicknessParam = c.req.query('thickness_mm');
   const thickness = thicknessParam ? parseFloat(thicknessParam) : 6;
 
-  // Step A: Resolve amperage
   const amperage = resolveAmperage(settings.wire_feed_speed_ipm);
-
-  // Step B: Calculate heat input
   const heatInput = calculateHeatInput(settings.voltage, amperage, telemetry.travel_speed_mms);
-
-  // Step C: Melting threshold + bead expansion
   const meltingThreshold = getMeltingThreshold(thickness);
   const { beadExpansionFactor, thermalColorStop } = computeBeadExpansion(
-    heatInput,
-    meltingThreshold,
-    telemetry.trigger_pressed
+    heatInput, meltingThreshold, telemetry.trigger_pressed
   );
 
-  const result: GMAWFrameResponse = {
+  return c.json({
     resolved_amperage: Math.round(amperage * 10) / 10,
     heat_input: Math.round(heatInput * 10000) / 10000,
     above_melting_threshold: heatInput > meltingThreshold,
-    tip_position: {
-      x: telemetry.x_mm,
-      y: telemetry.y_mm,
-      z: telemetry.z_gap_mm,
-    },
+    tip_position: { x: telemetry.x_mm, y: telemetry.y_mm, z: telemetry.z_gap_mm },
     bead_expansion_factor: Math.round(beadExpansionFactor * 1000) / 1000,
     thermal_color_stop: Math.round(thermalColorStop * 1000) / 1000,
-  };
-
-  return c.json(result);
+  } satisfies GMAWFrameResponse);
 });
 
-// POST /api/gmaw/session
-// Accepts a batch of telemetry frames + session metadata, scores the session,
-// and returns a GMAWSessionSummary ready for D1 insertion.
-app.post('/api/gmaw/session', async (c) => {
+// POST /session — Batch of telemetry frames → session scoring → D1-ready summary
+gmawRoutes.post('/session', async (c) => {
   let body: { packet: GMAWTelemetryBody; frames: GMAWTelemetryBody['telemetry'][]; r2_key?: string };
 
   try {
@@ -229,36 +216,28 @@ app.post('/api/gmaw/session', async (c) => {
   }
 
   const { packet, frames, r2_key } = body;
-
   if (!packet?.meta?.session_id || !frames?.length) {
     return c.json({ error: 'Missing required fields: packet.meta.session_id, frames[]' }, 400);
   }
 
-  // Score the session
   const n = frames.length;
 
-  // Spatial score — z_gap consistency
   const zGaps = frames.map((f) => f.z_gap_mm);
   const zMean = zGaps.reduce((a, b) => a + b, 0) / n;
   const zStdDev = Math.sqrt(zGaps.reduce((sum, z) => sum + (z - zMean) ** 2, 0) / n);
-  const zCenterPenalty = Math.abs(zMean - 3.5) * 8;
-  const zStdPenalty = zStdDev * 12;
-  const spatialScore = Math.max(0, Math.min(100, Math.round(100 - zCenterPenalty - zStdPenalty)));
+  const spatialScore = Math.max(0, Math.min(100, Math.round(100 - Math.abs(zMean - 3.5) * 8 - zStdDev * 12)));
 
-  // Speed score — travel speed consistency
   const speeds = frames.map((f) => f.travel_speed_mms);
   const speedMean = speeds.reduce((a, b) => a + b, 0) / n;
   const speedStdDev = Math.sqrt(speeds.reduce((sum, s) => sum + (s - speedMean) ** 2, 0) / n);
   const cv = speedMean > 0 ? speedStdDev / speedMean : 1;
   const speedScore = Math.max(0, Math.min(100, Math.round(100 - cv * 100)));
 
-  // Average amperage and heat input
   const avgAmperage = resolveAmperage(packet.settings.wire_feed_speed_ipm);
   let totalHeatInput = 0;
   for (const f of frames) {
     totalHeatInput += calculateHeatInput(packet.settings.voltage, avgAmperage, f.travel_speed_mms);
   }
-  const avgHeatInput = totalHeatInput / n;
 
   return c.json({
     session_id: packet.meta.session_id,
@@ -267,7 +246,7 @@ app.post('/api/gmaw/session', async (c) => {
     configured_voltage: packet.settings.voltage,
     configured_wfs_ipm: packet.settings.wire_feed_speed_ipm,
     resolved_avg_amperage: Math.round(avgAmperage * 10) / 10,
-    calculated_heat_input: Math.round(avgHeatInput * 10000) / 10000,
+    calculated_heat_input: Math.round(totalHeatInput / n * 10000) / 10000,
     spatial_score: spatialScore,
     speed_score: speedScore,
     final_grade: null,
@@ -275,6 +254,9 @@ app.post('/api/gmaw/session', async (c) => {
     created_at: new Date().toISOString(),
   });
 });
+
+// Mount GMAW routes at /api/gmaw (served at /api/gmaw by Pages Functions)
+app.route('/api/gmaw', gmawRoutes);
 
 // ── Export for Cloudflare Pages Functions ────────────────────────────────────
 // The `handle` adapter converts Hono's app into a Pages Functions handler.
