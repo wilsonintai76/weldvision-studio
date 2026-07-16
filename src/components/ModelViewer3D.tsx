@@ -511,7 +511,7 @@ export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>
   };
 
   // Add clicking to place annotations on the mesh
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!rendererRef.current || !cameraRef.current || !sceneRef.current || !weldmentGroupRef.current) return;
 
     // Only place annotation if we didn't drag the mouse (meaning simple clean click)
@@ -682,7 +682,7 @@ export const ModelViewer3D = forwardRef<ModelViewer3DHandle, ModelViewer3DProps>
 
             // Shift thermal color based on frame
             child.material.emissive = thermalColor;
-            child.material.emissiveIntensity = gmawFrame.trigger_pressed ? 2.0 : 0.5;
+            child.material.emissiveIntensity = gmawFrame.above_melting_threshold ? 2.0 : 0.5;
           }
         }
       });
