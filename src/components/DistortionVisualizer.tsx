@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { WeldParameters, DistortionMetric, MaterialType } from '../types';
 import { Activity, Thermometer, ShieldCheck, Zap, AlertTriangle, Layers, Maximize, MoveVertical, Link, PenTool, Brain, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { PredictiveAnalysis } from './PredictiveAnalysis';
-import { motion, AnimatePresence } from 'motion/react';
 
 interface DistortionVisualizerProps {
   parameters: WeldParameters;
@@ -302,9 +301,9 @@ export const DistortionVisualizer: React.FC<DistortionVisualizerProps> = ({
             </button>
           </div>
 
-          <AnimatePresence initial={false}>
+          <div>
             {!isCurveMinimized && (
-              <motion.div 
+              <div 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
@@ -361,9 +360,9 @@ export const DistortionVisualizer: React.FC<DistortionVisualizerProps> = ({
                     <span>Carbon steel displays balanced thermal properties. The temperature decays gradually outward. Thermal distortion is predictable but requires proper joint spacing.</span>
                   )}
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </div>
       </div>
 

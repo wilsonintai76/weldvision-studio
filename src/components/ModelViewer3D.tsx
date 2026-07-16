@@ -21,7 +21,6 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface Annotation {
@@ -932,9 +931,9 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
                 </button>
               </div>
 
-              <AnimatePresence>
+              <div>
                 {!isThermalCurveMinimized && (
-                  <motion.div 
+                  <div 
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
@@ -953,9 +952,9 @@ export const ModelViewer3D: React.FC<ModelViewer3DProps> = ({
                         <Line type="monotone" dataKey="temp" stroke="#f59e0b" strokeWidth={2} dot={false} isAnimationActive={false} />
                       </LineChart>
                     </ResponsiveContainer>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
+              </div>
             </div>
           </div>
 

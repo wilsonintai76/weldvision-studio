@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Brain, Zap, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 import { WeldParameters, DistortionMetric, MetallurgyResult } from '../types';
 import { calculateHICRisk } from '../utils/metallurgy';
 import { predictiveAnalysis } from '../api/client';
@@ -146,9 +145,9 @@ export const PredictiveAnalysis: React.FC<PredictiveAnalysisProps> = ({
         </div>
 
         {/* AI Insight Card */}
-        <AnimatePresence>
+        <div>
           {aiExplanation && (
-            <motion.div 
+            <div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="relative"
@@ -171,9 +170,9 @@ export const PredictiveAnalysis: React.FC<PredictiveAnalysisProps> = ({
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
 
         {isAnalyzing && !aiExplanation && (
           <div className="flex flex-col items-center justify-center py-10 gap-3 border border-dashed border-slate-800 rounded-xl">

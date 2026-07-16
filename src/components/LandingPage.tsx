@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
 import { Layers, Cpu, ShieldCheck, Gauge, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -49,7 +48,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 font-sans">
       <div className="max-w-4xl w-full">
         {/* Header Section */}
-        <motion.div 
+        <div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -65,12 +64,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Hyper-focused GMAW (MIG) welding simulation. Fixed-torch geometry, deterministic thermophysics, and real-time 3D bead visualization for technical education.
           </p>
-        </motion.div>
+        </div>
 
         {/* Objectives Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
           {objectives.map((obj, i) => (
-            <motion.div
+            <div
               key={obj.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -80,12 +79,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <div className="mb-4">{obj.icon}</div>
               <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-2">{obj.title}</h3>
               <p className="text-xs text-slate-500 leading-relaxed font-medium">{obj.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Instructor Sign-In */}
-        <motion.div
+        <div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
@@ -153,7 +152,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <div className="w-px h-3 bg-slate-700"></div>
             <span className="text-[10px] font-mono tracking-tighter uppercase">AWS D1.1 Standards</span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Decorative BG elements */}

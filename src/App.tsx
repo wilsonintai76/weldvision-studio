@@ -10,7 +10,6 @@ import { DefectGallery } from './components/DefectGallery';
 import { WeldQuiz } from './components/WeldQuiz';
 import { AudioToggle } from './components/AudioToggle';
 import { simulateWelding } from './utils/simulation';
-import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/LandingPage';
 import { WeldVisionStudio } from './components/WeldVisionStudio';
 import { useAuth } from './context/AuthContext';
@@ -112,7 +111,7 @@ export default function App() {
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider truncate">{label}</span>
           <Info className="w-2.5 h-2.5 text-slate-600" />
         </div>
-        <motion.div 
+        <div 
           key={label + value}
           initial={{ opacity: 0.6, x: -2 }}
           animate={{ opacity: 1, x: 0 }}
@@ -120,20 +119,20 @@ export default function App() {
           className="text-base md:text-lg font-display font-bold text-slate-100"
         >
           {value}
-        </motion.div>
-        <motion.span 
+        </div>
+        <span 
           key={label + subValue.text}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className={`text-[9px] font-mono font-bold mt-1 px-1.5 py-0.5 rounded border self-start truncate max-w-full ${subValue.class}`}
         >
           {subValue.text}
-        </motion.span>
+        </span>
       </div>
 
-      <AnimatePresence>
+      <div>
         {activeTooltip === tooltipKey && (
-          <motion.div 
+          <div 
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
@@ -146,9 +145,9 @@ export default function App() {
               {tooltips[tooltipKey as keyof typeof tooltips].description}
             </p>
             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-r border-b border-slate-700 rotate-45" />
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 
@@ -197,7 +196,7 @@ export default function App() {
           />
         </WeldVisionStudio>
       ) : (
-        <motion.div 
+        <div 
           key="lab"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -271,7 +270,7 @@ export default function App() {
       </div>
 
       {/* Top Level Real-Time Physical Metrics Dashboard */}
-      <motion.section 
+      <section 
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -329,7 +328,7 @@ export default function App() {
           }}
           tooltipKey="quench"
         />
-      </motion.section>
+      </section>
 
       {/* Main Core Columns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -412,7 +411,7 @@ export default function App() {
           </div>
 
           {/* Active Tab View Window */}
-          <motion.div
+          <div
             key={activeTab}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -460,7 +459,7 @@ export default function App() {
             ) : (
               <WeldQuiz />
             )}
-          </motion.div>
+          </div>
         </div>
 
       </div>
@@ -531,7 +530,7 @@ export default function App() {
           CONNECTED TO: <span className="text-amber-500 font-mono">WELD-BOT-PRIME-04</span> | LATENCY: 12ms
         </div>
       </footer>
-    </motion.div>
+    </div>
   )}
 </>
   );
