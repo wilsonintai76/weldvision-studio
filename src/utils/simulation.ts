@@ -1,4 +1,5 @@
-import { WeldParameters, SimulationResult, DefectMetric, DistortionMetric, LabPreset } from '../types';
+import { WeldParameters, SimulationResult, DefectMetric, DistortionMetric, LabPreset, GMAWTelemetryPacket, GMAWFrameResult } from '../types';
+import { resolveAmperage, calculateHeatInput, getMeltingThreshold, computeBeadExpansion } from './gmaw-telemetry';
 
 // Process thermal efficiency factors
 const EFFICIENCY = {
@@ -476,3 +477,75 @@ export const LAB_PRESETS: LabPreset[] = [
     }
   }
 ];
+
+// ── GMAW Telemetry-Driven Simulation Wrapper ─────────────────────────────────
+
+/**
+ * GMAW-only simulation path that bridges the Android telemetry contract
+ * directly into the existing WeldSim simulation engine.
+ *
+ * Unlike simulateWelding() which uses manual parameter sliders, this function
+ * takes a real GMAWTelemetryPacket from the MQTT broker and:
+ *   1. Resolves amperage from wire feed speed (Step A)
+ *   2. Computes net heat input density (Step B)
+ *   3. Produces a GMAWFrameResult for Three.js bead expansion (Step C)
+ *   4. Feeds derived parameters into the existing simulateWelding() pipeline
+ *      for full defect analysis and distortion scoring
+ *
+ * @param packet - GMAW telemetry packet from Android / MQTT
+ * @param thickness_mm - Plate thickness (mm), default 6
+ * @param tipCalibration - Optional bracket calibration offsets
+ * @returns GMAWFrameResult + full SimulationResult
+ */
+export function simulateGMAWFromTelemetry(
+  packet: GMAWTelemetryPacket,
+  thickness_mm: number = 6,
+  tipCalibration?: { offset_x: number; offset_y: number; offset_z: number }
+): { frame: GMAWFrameResult; simulation: SimulationResult } {
+  const { settings, telemetry } = packet;
+
+  // Step A: Resolve amperage
+  const resolvedAmps = resolveAmperage(settings.wire_feed_speed_ipm);
+
+  // Step B: Net heat input
+  const heatInput = calculateHeatInput(settings.voltage, resolvedAmps, telemetry.travel_speed_mms);
+
+  // Step C: Melting threshold + bead expansion
+  const meltingThreshold = getMeltingThreshold(thickness_mm);
+  const { beadExpansionFactor, thermalColorStop } = computeBeadExpansion(
+    heatInput,
+    meltingThreshold,
+    telemetry.trigger_pressed
+  );
+
+  // Build frame result for Three.js consumption
+  const frame: GMAWFrameResult = {
+    resolved_amperage: Math.round(resolvedAmps * 10) / 10,
+    heat_input: Math.round(heatInput * 10000) / 10000,
+    above_melting_threshold: heatInput > meltingThreshold,
+    tip_position: {
+      x: telemetry.x_mm + (tipCalibration?.offset_x ?? 0),
+      y: telemetry.y_mm + (tipCalibration?.offset_y ?? 0),
+      z: telemetry.z_gap_mm + (tipCalibration?.offset_z ?? 0),
+    },
+    bead_expansion_factor: Math.round(beadExpansionFactor * 1000) / 1000,
+    thermal_color_stop: Math.round(thermalColorStop * 1000) / 1000,
+  };
+
+  // Feed derived parameters into the existing full simulation pipeline
+  const simulation = simulateWelding({
+    material: 'Carbon Steel',
+    process: 'GMAW',
+    jointType: 'Butt Joint',
+    restraint: 'Medium',
+    thickness: thickness_mm,
+    current: resolvedAmps,
+    voltage: settings.voltage,
+    speed: telemetry.travel_speed_mms,
+    preheat: 20,
+    gasFlow: 14,
+    electrodeDiameter: 0.9, // Standard GMAW wire
+  });
+
+  return { frame, simulation };
+}

@@ -65,3 +65,93 @@ export interface LabPreset {
   targetDefect: string;
   parameters: Partial<WeldParameters>;
 }
+
+// ── GMAW-Specific Telemetry Contract ────────────────────────────────────────
+
+/**
+ * Uniform data contract for every packet traveling across the MQTT broker
+ * or stored inside the OPFS SQLite file system. Locked to GMAW only.
+ */
+export interface GMAWTelemetryPacket {
+  meta: GMAWSessionMeta;
+  settings: GMAWSettings;
+  telemetry: GMAWTelemetryFrame;
+}
+
+export interface GMAWSessionMeta {
+  session_id: string;
+  student_id: string;
+  bracket_id: string;
+}
+
+export interface GMAWSettings {
+  /** GMAW constant-voltage setpoint (V) */
+  voltage: number;
+  /** Wire feed speed (in/min) */
+  wire_feed_speed_ipm: number;
+}
+
+export interface GMAWTelemetryFrame {
+  /** Gun tip X position (mm) */
+  x_mm: number;
+  /** Gun tip Y position (mm) */
+  y_mm: number;
+  /** Contact tip to workpiece distance (mm) */
+  z_gap_mm: number;
+  /** Instantaneous travel speed (mm/s) */
+  travel_speed_mms: number;
+  /** Work angle (degrees) */
+  work_angle_deg: number;
+  /** Travel/drag angle (degrees) */
+  travel_angle_deg: number;
+  /** Gun trigger state */
+  trigger_pressed: boolean;
+}
+
+/**
+ * Result of the GMAW thermophysics solver for a single telemetry frame.
+ * Feeds directly into the Three.js mesh distortion / bead growth algorithms.
+ */
+export interface GMAWFrameResult {
+  /** Resolved operating amperage from wire feed speed (A) */
+  resolved_amperage: number;
+  /** Net heat input per unit length (kJ/mm) */
+  heat_input: number;
+  /** Whether the heat input exceeds the critical melting threshold */
+  above_melting_threshold: boolean;
+  /** Smoothed 3D tip position after SQLite matrix transforms */
+  tip_position: { x: number; y: number; z: number };
+  /** Bead expansion radius factor (normalized 0-1) */
+  bead_expansion_factor: number;
+  /** Thermal gradient color stop (0 = Bright Yellow, 0.5 = Cherry Red, 1 = Slag Gray) */
+  thermal_color_stop: number;
+}
+
+/**
+ * Aggregated session summary stored in D1 after a completed GMAW run.
+ */
+export interface GMAWSessionSummary {
+  session_id: string;
+  student_id: string;
+  bracket_id: string;
+  configured_voltage: number;
+  configured_wfs_ipm: number;
+  resolved_avg_amperage: number;
+  calculated_heat_input: number;
+  spatial_score: number;
+  speed_score: number;
+  final_grade: number | null;
+  r2_json_key: string;
+  created_at: string;
+}
+
+// ── Calibration ─────────────────────────────────────────────────────────────
+
+export interface BracketCalibration {
+  bracket_id: string;
+  focal_length_px: number;
+  tip_offset_x_mm: number;
+  tip_offset_y_mm: number;
+  tip_offset_z_mm: number;
+  updated_at: string;
+}
