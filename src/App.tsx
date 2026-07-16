@@ -192,19 +192,14 @@ export default function App() {
       {!hasStarted ? (
         <LandingPage key="landing" onStart={() => setHasStarted(true)} />
       ) : isWorkshopMode ? (
-        <WeldVisionStudio
-          key="workshop"
-          threeJsScene={
-            <div className="w-full h-full">
-              <ModelViewer3D
-                ref={modelViewerRef}
-                parameters={parameters}
-                distortion={simulation.distortion}
-                heatInput={simulation.heatInput}
-              />
-            </div>
-          }
-        />
+        <WeldVisionStudio key="workshop">
+          <ModelViewer3D
+            ref={modelViewerRef}
+            parameters={parameters}
+            distortion={simulation.distortion}
+            heatInput={simulation.heatInput}
+          />
+        </WeldVisionStudio>
       ) : (
         <motion.div 
           key="lab"

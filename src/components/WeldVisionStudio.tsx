@@ -2,17 +2,15 @@ import React, { useState } from 'react';
 import { QrGeneratorCard } from './QrGeneratorCard';
 
 interface WeldVisionStudioProps {
-  threeJsScene?: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 /**
  * WeldVisionStudio — Live Workshop Layout
- *
- * Multi-student monitoring interface with embedded Three.js viewport.
- * MQTT ingestion pipeline connects when broker is available.
+ * Multi-student monitoring with embedded Three.js viewport.
  */
 export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
-  threeJsScene,
+  children,
 }) => {
   const [selectedStudentId] = useState<string | null>(null);
 
@@ -60,7 +58,7 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
           </div>
         </div>
         <div className="grow rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden shadow-inner">
-          {threeJsScene || (
+          {children || (
             <div className="w-full h-full flex items-center justify-center text-slate-600 italic">
               [ Three.js Simulation Viewport ]
             </div>
