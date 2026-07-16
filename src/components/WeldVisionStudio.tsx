@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import mqtt from 'mqtt';
 import { getSqliteDbInstance } from '../utils/localDb';
 import { QrGeneratorCard } from './QrGeneratorCard';
 import { GMAWTelemetryPacket } from '../types';
@@ -18,7 +17,7 @@ import { GMAWTelemetryPacket } from '../types';
 // ── Broker Configuration ─────────────────────────────────────────────────────
 
 const LOCAL_LAN_BROKER = 'ws://192.168.1.45:9001/mqtt';
-const CLOUD_WAN_BROKER = 'mqtts://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8883/mqtt';
+const CLOUD_WAN_BROKER = 'wss://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8884/mqtt';
 
 // ── GMAW Thermophysics Inline Functions ──────────────────────────────────────
 
@@ -73,61 +72,66 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
 
   useEffect(() => {
     const isSecure = window.location.protocol === 'https:';
-    if (isSecure) {
-      console.log('[MQTT] HTTPS detected — MQTT disabled (requires local LAN or WSS proxy).');
-      return;
-    }
 
-    let localClient: mqtt.MqttClient | null = null;
-    let cloudClient: mqtt.MqttClient | null = null;
+    let localClient: any = null;
+    let cloudClient: any = null;
+    let cleanup = false;
 
-    const handleIncomingFrame = (topic: string, message: Buffer) => {
-      try {
-        const topicParts = topic.split('/');
-        const studentId = topicParts[2];
-        const rawFrame = JSON.parse(message.toString()) as GMAWTelemetryPacket;
+    import('mqtt').then((mqtt) => {
+      if (cleanup) return;
 
-        const resolvedAmperage = resolveAmperage(rawFrame.settings.wire_feed_speed_ipm);
-        const travelSpeed = rawFrame.telemetry.travel_speed_mms;
-        const netHeatInput = calculateHeatInput(
-          rawFrame.settings.voltage, resolvedAmperage, travelSpeed
-        );
+      const handleIncomingFrame = (topic: string, message: Buffer) => {
+        try {
+          const topicParts = topic.split('/');
+          const studentId = topicParts[2];
+          const rawFrame = JSON.parse(message.toString()) as GMAWTelemetryPacket;
 
-        const enrichedFrame = { ...rawFrame, calculated: { amperage: resolvedAmperage, heatInput: netHeatInput } };
-
-        if (!sessionBuffers.current.has(studentId)) {
-          sessionBuffers.current.set(studentId, []);
-          setActiveSessions((prev) => new Map(prev.set(studentId, { status: 'Welding...' })));
-        }
-        sessionBuffers.current.get(studentId)!.push(enrichedFrame);
-
-        if (studentId === selectedStudentId && threeCanvasRef.current) {
-          threeCanvasRef.current.updateSimulationMesh(
-            enrichedFrame.telemetry.x_mm, enrichedFrame.telemetry.y_mm,
-            enrichedFrame.telemetry.z_gap_mm, netHeatInput, enrichedFrame.telemetry.trigger_pressed
+          const resolvedAmperage = resolveAmperage(rawFrame.settings.wire_feed_speed_ipm);
+          const travelSpeed = rawFrame.telemetry.travel_speed_mms;
+          const netHeatInput = calculateHeatInput(
+            rawFrame.settings.voltage, resolvedAmperage, travelSpeed
           );
+
+          const enrichedFrame = { ...rawFrame, calculated: { amperage: resolvedAmperage, heatInput: netHeatInput } };
+
+          if (!sessionBuffers.current.has(studentId)) {
+            sessionBuffers.current.set(studentId, []);
+            setActiveSessions((prev) => new Map(prev.set(studentId, { status: 'Welding...' })));
+          }
+          sessionBuffers.current.get(studentId)!.push(enrichedFrame);
+
+          if (studentId === selectedStudentId && threeCanvasRef.current) {
+            threeCanvasRef.current.updateSimulationMesh(
+              enrichedFrame.telemetry.x_mm, enrichedFrame.telemetry.y_mm,
+              enrichedFrame.telemetry.z_gap_mm, netHeatInput, enrichedFrame.telemetry.trigger_pressed
+            );
+          }
+        } catch (err) {
+          console.warn('Failed to process MQTT frame:', err);
         }
-      } catch (err) {
-        console.warn('Failed to process MQTT frame:', err);
+      };
+
+      // Local LAN broker — WS only, skip on HTTPS
+      if (!isSecure) {
+        try {
+          localClient = mqtt.connect(LOCAL_LAN_BROKER, { reconnectPeriod: 3000, connectTimeout: 5000 });
+          localClient.on('connect', () => { if (!cleanup) localClient!.subscribe('weldvision/room_A/+/live'); });
+          localClient.on('message', handleIncomingFrame);
+          localClient.on('error', () => {});
+        } catch {}
       }
-    };
 
-    // Connect only if not on HTTPS (production uses WSS, local uses WS)
-    try {
-      localClient = mqtt.connect(LOCAL_LAN_BROKER, { reconnectPeriod: 3000, connectTimeout: 5000 });
-      localClient.on('connect', () => { console.log('[MQTT] LAN broker connected'); localClient!.subscribe('weldvision/room_A/+/live'); });
-      localClient.on('message', handleIncomingFrame);
-      localClient.on('error', () => {}); // Silently ignore — expected on HTTPS/production
-    } catch { /* MQTT unavailable — running in offline mode */ }
-
-    try {
-      cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'studio_dashboard', password: 'pwd', reconnectPeriod: 5000, connectTimeout: 8000 });
-      cloudClient.on('connect', () => { console.log('[MQTT] Cloud broker connected'); cloudClient!.subscribe('weldvision/room_A/+/live'); });
-      cloudClient.on('message', handleIncomingFrame);
-      cloudClient.on('error', () => {}); // Silently ignore
-    } catch { /* Cloud MQTT unavailable */ }
+      // Cloud WAN broker — WSS always available
+      try {
+        cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'studio_dashboard', password: 'pwd', reconnectPeriod: 5000, connectTimeout: 8000 });
+        cloudClient.on('connect', () => { if (!cleanup) cloudClient!.subscribe('weldvision/room_A/+/live'); });
+        cloudClient.on('message', handleIncomingFrame);
+        cloudClient.on('error', () => {});
+      } catch {}
+    }).catch(() => {});
 
     return () => {
+      cleanup = true;
       try { localClient?.end(true); } catch {}
       try { cloudClient?.end(true); } catch {}
     };
