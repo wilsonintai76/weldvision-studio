@@ -1,12 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Play, BookOpen, Cpu, Layers, ShieldCheck, ChevronRight, Gauge } from 'lucide-react';
+import { Layers, Cpu, ShieldCheck, Gauge, Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LandingPageProps {
   onStart: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await login(email, password);
+      onStart();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const objectives = [
     {
       icon: <Layers className="w-5 h-5 text-indigo-400" />,
@@ -64,25 +84,69 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           ))}
         </div>
 
-        {/* CTA Section */}
-        <motion.div 
+        {/* Instructor Sign-In */}
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
-          className="flex flex-col items-center"
+          className="max-w-sm mx-auto"
         >
-          <button
-            onClick={onStart}
-            className="group relative flex items-center gap-3 bg-amber-500 text-slate-950 px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm hover:bg-amber-400 transition-all shadow-2xl shadow-amber-500/20 active:scale-95"
-          >
-            <span>Launch GMAW Simulator</span>
-            <Play className="w-4 h-4 fill-current transition-transform group-hover:translate-x-1" />
-            
-            {/* Pulsing ring */}
-            <div className="absolute inset-0 rounded-full border-2 border-amber-400/20 animate-ping -z-10"></div>
-          </button>
-          
-          <div className="mt-8 flex items-center gap-6 opacity-30">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-1 text-center">
+              Instructor Sign In
+            </h2>
+            <p className="text-[10px] text-slate-500 text-center mb-5">
+              Students access via Android Trainer only
+            </p>
+
+            {error && (
+              <div className="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 mb-4">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2 bg-amber-500 text-slate-950 py-2.5 rounded-lg font-bold uppercase tracking-wider text-sm hover:bg-amber-400 disabled:opacity-50 transition-all mt-1"
+              >
+                {isSubmitting ? (
+                  <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <LogIn className="w-4 h-4" />
+                )}
+                Sign In
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-6 flex items-center gap-4 opacity-30 justify-center">
             <span className="text-[10px] font-mono tracking-tighter uppercase">GMAW Constant Voltage</span>
             <div className="w-px h-3 bg-slate-700"></div>
             <span className="text-[10px] font-mono tracking-tighter uppercase">0.9mm Steel Wire</span>

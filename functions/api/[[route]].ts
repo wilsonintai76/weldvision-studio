@@ -114,6 +114,91 @@ const app = new Hono<{ Bindings: Bindings }>();
 // Enable CORS for all routes (needed during Pages dev proxy)
 app.use('*', cors());
 
+// ── Auth Routes ──────────────────────────────────────────────────────────────
+
+// POST /api/auth/register
+app.post('/api/auth/register', async (c) => {
+  let body: { email: string; password: string; name: string };
+  try { body = await c.req.json(); } catch {
+    return c.json({ error: 'Invalid JSON' }, 400);
+  }
+
+  if (!body.email || !body.password || !body.name) {
+    return c.json({ error: 'Email, password, and name are required' }, 400);
+  }
+
+  // Check if email already exists
+  const existing = await c.env.DB.prepare(
+    'SELECT user_id FROM users WHERE email = ?'
+  ).bind(body.email).first();
+
+  if (existing) {
+    return c.json({ error: 'Email already registered' }, 409);
+  }
+
+  // Hash password with a simple SHA-256 + salt (production: use bcrypt via Web Crypto)
+  const salt = 'weldvision-salt';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(body.password + ':' + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  const userId = `user_${Date.now()}`;
+
+  await c.env.DB.prepare(
+    'INSERT INTO users (user_id, name, email, password_hash, account_status) VALUES (?, ?, ?, ?, ?)'
+  ).bind(userId, body.name, body.email, passwordHash, 'active').run();
+
+  return c.json({ user_id: userId, name: body.name, email: body.email });
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async (c) => {
+  let body: { email: string; password: string };
+  try { body = await c.req.json(); } catch {
+    return c.json({ error: 'Invalid JSON' }, 400);
+  }
+
+  if (!body.email || !body.password) {
+    return c.json({ error: 'Email and password are required' }, 400);
+  }
+
+  // Look up user
+  const user = await c.env.DB.prepare(
+    'SELECT user_id, name, email, password_hash, account_status FROM users WHERE email = ?'
+  ).bind(body.email).first<{
+    user_id: string; name: string; email: string;
+    password_hash: string; account_status: string;
+  }>();
+
+  if (!user) {
+    return c.json({ error: 'Invalid email or password' }, 401);
+  }
+
+  if (user.account_status !== 'active') {
+    return c.json({ error: 'Account is disabled' }, 403);
+  }
+
+  // Verify password
+  const salt = 'weldvision-salt';
+  const encoder = new TextEncoder();
+  const data = encoder.encode(body.password + ':' + salt);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const passwordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+  if (passwordHash !== user.password_hash) {
+    return c.json({ error: 'Invalid email or password' }, 401);
+  }
+
+  return c.json({
+    user_id: user.user_id,
+    name: user.name,
+    email: user.email,
+  });
+});
+
 // POST /api/predictive-analysis
 // Accepts weld parameters, calls Llama 3.3 70B via Workers AI,
 // returns a professional metallurgical crack-risk explanation.

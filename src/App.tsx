@@ -13,6 +13,7 @@ import { simulateWelding } from './utils/simulation';
 import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/LandingPage';
 import { WeldVisionStudio } from './components/WeldVisionStudio';
+import { useAuth } from './context/AuthContext';
 import { 
   Flame, 
   Layers, 
@@ -45,6 +46,7 @@ const DEFAULT_PARAMETERS: WeldParameters = {
 };
 
 export default function App() {
+  const { user, logout } = useAuth();
   const [hasStarted, setHasStarted] = useState(false);
   const [isWorkshopMode, setIsWorkshopMode] = useState(false);
   const [parameters, setParameters] = useState<WeldParameters>(DEFAULT_PARAMETERS);
@@ -232,11 +234,11 @@ export default function App() {
         <div className="flex items-center gap-3 md:gap-6 shrink-0">
           <div className="flex items-center gap-2 md:gap-4 text-xs sm:text-sm font-semibold">
             <button 
-              onClick={() => setHasStarted(false)}
+              onClick={() => { setHasStarted(false); logout(); }}
               className="flex items-center gap-1.5 px-2 py-1 rounded bg-slate-700/50 border border-slate-600 text-[10px] text-slate-400 hover:text-red-400 hover:border-red-500/30 transition-all uppercase tracking-tight"
             >
               <LogOut className="w-3 h-3" />
-              <span className="hidden sm:inline">Exit Session</span>
+              <span className="hidden sm:inline">Sign Out</span>
             </button>
             <div className="w-px h-4 bg-slate-700 mx-0.5"></div>
             <div className="flex items-center gap-1.5 px-1.5 md:px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-amber-400 shrink-0">
@@ -263,8 +265,8 @@ export default function App() {
               <span className="hidden sm:inline">Reset Workshop</span>
             </button>
           </div>
-          <div className="w-8 h-8 rounded-full bg-slate-600 border border-slate-500 flex items-center justify-center text-xs font-bold text-white uppercase">
-            AX
+          <div className="w-8 h-8 rounded-full bg-amber-500 border border-amber-400 flex items-center justify-center text-xs font-bold text-slate-950 uppercase">
+            {user?.name?.charAt(0) || 'I'}
           </div>
         </div>
       </header>
