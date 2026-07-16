@@ -188,7 +188,7 @@ export default function App() {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <>
       {!hasStarted ? (
         <LandingPage key="landing" onStart={() => setHasStarted(true)} />
       ) : isWorkshopMode ? (
@@ -537,6 +537,6 @@ export default function App() {
       </footer>
     </motion.div>
   )}
-</AnimatePresence>
+</>
   );
 }
