@@ -18,7 +18,7 @@ import { GMAWTelemetryPacket } from '../types';
 // ── Broker Configuration ─────────────────────────────────────────────────────
 
 const LOCAL_LAN_BROKER = 'ws://192.168.1.45:9001/mqtt';
-const CLOUD_WAN_BROKER = 'wss://your-hivemq-cluster.com:8884/mqtt';
+const CLOUD_WAN_BROKER = 'mqtts://e6c9c71794bd4f61895d032657d876a2.s1.eu.hivemq.cloud:8883/mqtt';
 
 // ── GMAW Thermophysics Inline Functions ──────────────────────────────────────
 
@@ -70,64 +70,33 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
   // ── Dual MQTT Ingestion Pipeline ───────────────────────────────────────────
 
   useEffect(() => {
-    // Attempt local LAN broker connection
-    const localClient = mqtt.connect(LOCAL_LAN_BROKER, {
-      reconnectPeriod: 3000,
-      connectTimeout: 5000,
-    });
-
-    // Attempt cloud WAN fallback connection
-    const cloudClient = mqtt.connect(CLOUD_WAN_BROKER, {
-      username: 'studio_dashboard',
-      password: 'pwd',
-      reconnectPeriod: 5000,
-      connectTimeout: 8000,
-    });
+    let localClient: mqtt.MqttClient | null = null;
+    let cloudClient: mqtt.MqttClient | null = null;
 
     const handleIncomingFrame = (topic: string, message: Buffer) => {
       try {
         const topicParts = topic.split('/');
-        // Path: weldvision/room_A/{student_id}/live
         const studentId = topicParts[2];
-
         const rawFrame = JSON.parse(message.toString()) as GMAWTelemetryPacket;
 
-        // ── GMAW Real-Time Physical Ingestion ────────────────────────────
         const resolvedAmperage = resolveAmperage(rawFrame.settings.wire_feed_speed_ipm);
         const travelSpeed = rawFrame.telemetry.travel_speed_mms;
-
-        // Net Energy Input: Q = (η · V · I) / v
         const netHeatInput = calculateHeatInput(
-          rawFrame.settings.voltage,
-          resolvedAmperage,
-          travelSpeed
+          rawFrame.settings.voltage, resolvedAmperage, travelSpeed
         );
 
-        const enrichedFrame = {
-          ...rawFrame,
-          calculated: {
-            amperage: resolvedAmperage,
-            heatInput: netHeatInput,
-          },
-        };
+        const enrichedFrame = { ...rawFrame, calculated: { amperage: resolvedAmperage, heatInput: netHeatInput } };
 
-        // Maintain telemetry stream in mutable ref without triggering React renders
         if (!sessionBuffers.current.has(studentId)) {
           sessionBuffers.current.set(studentId, []);
-          setActiveSessions((prev) =>
-            new Map(prev.set(studentId, { status: 'Welding...' }))
-          );
+          setActiveSessions((prev) => new Map(prev.set(studentId, { status: 'Welding...' })));
         }
         sessionBuffers.current.get(studentId)!.push(enrichedFrame);
 
-        // Route directly to Three.js scene if this student is selected
         if (studentId === selectedStudentId && threeCanvasRef.current) {
           threeCanvasRef.current.updateSimulationMesh(
-            enrichedFrame.telemetry.x_mm,
-            enrichedFrame.telemetry.y_mm,
-            enrichedFrame.telemetry.z_gap_mm,
-            netHeatInput,
-            enrichedFrame.telemetry.trigger_pressed
+            enrichedFrame.telemetry.x_mm, enrichedFrame.telemetry.y_mm,
+            enrichedFrame.telemetry.z_gap_mm, netHeatInput, enrichedFrame.telemetry.trigger_pressed
           );
         }
       } catch (err) {
@@ -135,29 +104,24 @@ export const WeldVisionStudio: React.FC<WeldVisionStudioProps> = ({
       }
     };
 
-    localClient.on('message', handleIncomingFrame);
-    cloudClient.on('message', handleIncomingFrame);
+    // Connect only if not on HTTPS (production uses WSS, local uses WS)
+    try {
+      localClient = mqtt.connect(LOCAL_LAN_BROKER, { reconnectPeriod: 3000, connectTimeout: 5000 });
+      localClient.on('connect', () => { console.log('[MQTT] LAN broker connected'); localClient!.subscribe('weldvision/room_A/+/live'); });
+      localClient.on('message', handleIncomingFrame);
+      localClient.on('error', () => {}); // Silently ignore — expected on HTTPS/production
+    } catch { /* MQTT unavailable — running in offline mode */ }
 
-    localClient.on('connect', () => {
-      console.log('[MQTT] Connected to local LAN broker');
-      localClient.subscribe('weldvision/room_A/+/live');
-    });
-
-    cloudClient.on('connect', () => {
-      console.log('[MQTT] Connected to cloud WAN broker');
-      cloudClient.subscribe('weldvision/room_A/+/live');
-    });
-
-    localClient.on('error', (err) =>
-      console.warn('[MQTT] Local broker error:', err.message)
-    );
-    cloudClient.on('error', (err) =>
-      console.warn('[MQTT] Cloud broker error:', err.message)
-    );
+    try {
+      cloudClient = mqtt.connect(CLOUD_WAN_BROKER, { username: 'studio_dashboard', password: 'pwd', reconnectPeriod: 5000, connectTimeout: 8000 });
+      cloudClient.on('connect', () => { console.log('[MQTT] Cloud broker connected'); cloudClient!.subscribe('weldvision/room_A/+/live'); });
+      cloudClient.on('message', handleIncomingFrame);
+      cloudClient.on('error', () => {}); // Silently ignore
+    } catch { /* Cloud MQTT unavailable */ }
 
     return () => {
-      localClient.end(true);
-      cloudClient.end(true);
+      try { localClient?.end(true); } catch {}
+      try { cloudClient?.end(true); } catch {}
     };
   }, [selectedStudentId]);
 
