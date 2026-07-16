@@ -17,6 +17,13 @@ database_id = "c1c1f0c2-8d97-4782-ad94-0ff2c2a837a5"
 migrations_dir = "./migrations"
 
 # ── R2 Bucket — 60 Hz GMAW Telemetry Archive ─────────────────────────────────
-[[r2_buckets]]
-binding = "TELEMETRY"
-bucket_name = "weld-telemetry"
+# TODO: Create bucket with: wrangler r2 bucket create weld-telemetry
+# [[r2_buckets]]
+# binding = "TELEMETRY"
+# bucket_name = "weld-telemetry"
+
+# ── KV Namespace — Session cache, rate limiting, feature flags ────────────────
+# TODO: Create with: wrangler kv namespace create WELDVISION_KV
+# [[kv_namespaces]]
+# binding = "KV"
+# id = ""

@@ -29,15 +29,19 @@ WeldSim Studio is the **browser-based frontend** of the WeldVision dual-platform
 | Layer | Technology |
 | --- | --- |
 | **Framework** | React 19 + TypeScript |
-| **Build Tool** | Vite 6 |
-| **3D Engine** | Three.js |
+| **Build** | Vite 6 |
 | **Styling** | Tailwind CSS 4 |
-| **Animation** | Motion (Framer Motion) |
+| **3D Engine** | Three.js |
+| **Animation** | Motion |
 | **Charts** | Recharts |
 | **Icons** | Lucide React |
 | **Backend** | Hono (Cloudflare Pages Functions) |
-| **AI Inference** | Cloudflare Workers AI (Llama 3.3 70B) |
-| **Deployment** | Cloudflare Pages + Workers |
+| **RPC** | Hono RPC (`hc` typed client) |
+| **AI** | Cloudflare Workers AI (Llama 3.3 70B) |
+| **Database** | Cloudflare D1 (SQLite) |
+| **Storage** | Cloudflare R2 (object archive) |
+| **Cache** | Cloudflare KV |
+| **Deploy** | Cloudflare Pages + Workers |
 
 ---
 
